@@ -1,0 +1,24 @@
+{
+  "name": "altered-deckfmt",
+  "version": "0.1.0",
+  "description": "A compact format for storing Altered TCG decklists",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist dist.esm",
+    "build": "npm run clean && tsc -b && tsc -b tsconfig.esm.json",
+    "test": "npm run build && node dist/test/encoding.test.js"
+  },
+  "dependencies": {
+    "@astronautlabs/bitstream": "^4.2.2",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.4.1",
+    "typescript": "^5.3.3",
+    "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.4.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

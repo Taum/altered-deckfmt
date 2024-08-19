@@ -1,0 +1,4 @@
+﻿dist
+dist.esm
+node_modules
+yarn.lock
