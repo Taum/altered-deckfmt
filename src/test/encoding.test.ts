@@ -24,28 +24,16 @@ for (let file of files) {
   })
 }
 
-console.log("Encoding to short format:")
-
 for (let list of exampleLists) {
   console.log("-----------------------------")
   console.log("- ", list.name)
   console.log(list.contents)
 
   const encoded = encodeList(list.contents)
-
   console.log("encoded => ", encoded)
   list.encoded = encoded
-}
 
-
-console.log("\n\nDecoding to text format:")
-
-for (let list of exampleLists) {
-  console.log("-----------------------------")
-  console.log("- ", list.name)
-  console.log("=> ", list.encoded)
-
-  const decodedText = decodeList(list.contents)
-
+  console.log("Decoding back to text format:")
+  const decodedText = decodeList(list.encoded)
   console.log(decodedText)
 }

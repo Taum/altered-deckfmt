@@ -7,6 +7,7 @@ export class EncodableCard extends BitstreamElement {
   @Field(3) faction: number;
   @Field(5) num_in_faction: number;
   @Field(2) rarity: number;
+  @Field(16, { presentWhen: i => i.rarity == 3 }) unique_num: number | undefined;
 
   set_code: number;
 
@@ -43,7 +44,7 @@ export class EncodableCard extends BitstreamElement {
       case 0: id += RefRarity.Common; break;
       case 1: id += RefRarity.Rare; break;
       case 2: id += RefRarity.RareOOF; break;
-      case 3: id += RefRarity.Unique; break;
+      case 3: id += RefRarity.Unique + "_" + this.unique_num; break;
     }
     return id
   }
@@ -54,7 +55,7 @@ export class EncodableCard extends BitstreamElement {
     ec.faction = refEls.factionId
     ec.num_in_faction = refEls.num_in_faction
     ec.rarity = refEls.rarityId
-    //ec.unique_num = refEls.uniq_num
+    ec.unique_num = refEls.uniq_num
     return ec
   }
 }
