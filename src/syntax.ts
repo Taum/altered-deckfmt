@@ -7,8 +7,8 @@ import "reflect-metadata";
 // from 0 - 0b10 1111 1111 1111 (12287, 0x2FFF) - plain 14 bit value
 // over     0b11 0000 0000 0000 (12288, 0x3000) - prefix is 0b11, rest of 20 bits form a number, add 0x3000
 // e.g. 12288 = 0b11 0000 ... 0000 0000
-// e.g. 12289 = 0b11 0000 ... 0000 0001
-// e.g. 12345 = 0b11 0000 ... 0011 1001 (12345 - 12288 = 57 = 0b111001)
+//      12289 = 0b11 0000 ... 0000 0001
+//      12345 = 0b11 0000 ... 0011 1001 (12345 - 12288 = 57 = 0b111001)
 // and so on up to 0b11 1111 ... 1111 = (2*20-1) + 12288 = 1060863 (0xFFFFF + 0x3000 = 0x102FFF)
 export class EncodableExtendedUniqueId extends BitstreamElement {
   @Field(2, { writtenValue: i => i.simple_number ? (i.simple_number >> 12) : 0b11 }) hiBits: number

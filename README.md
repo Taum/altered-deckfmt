@@ -33,10 +33,11 @@ ECTcM1CsQ8dUqYi8Ysscw841m9MVy5m9U9YtgdodkA==
 
 This project will provide a Javascript/Typescript module that can either be imported into a NodeJS project or loaded into a web page.
 
+A format specification in available in [FORMAT_SPEC.md](FORMAT_SPEC.md).
+
 ## TODOs
 
 * Cleanup module export so it's actually usable in another project.
-* Provide a language-agnostic specification so the format can be re-implemented in other languages.
 
 ## Usage
 
