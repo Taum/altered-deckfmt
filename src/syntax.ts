@@ -3,20 +3,49 @@ import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements 
 
 import "reflect-metadata";
 
+// 14bit or 22bit value - range 0 to 1060863 (0x102FFF) inclusive
+// from 0 - 0b10 1111 1111 1111 (12287, 0x2FFF) - plain 14 bit value
+// over     0b11 0000 0000 0000 (12288, 0x3000) - prefix is 0b11, rest of 20 bits form a number, add 0x3000
+// e.g. 12288 = 0b11 0000 ... 0000 0000
+// e.g. 12289 = 0b11 0000 ... 0000 0001
+// e.g. 12345 = 0b11 0000 ... 0011 1001 (12345 - 12288 = 57 = 0b111001)
+// and so on up to 0b11 1111 ... 1111 = (2*20-1) + 12288 = 1060863 (0xFFFFF + 0x3000 = 0x102FFF)
+export class EncodableExtendedUniqueId extends BitstreamElement {
+  @Field(2, { writtenValue: i => i.simple_number ? (i.simple_number >> 12) : 0b11 }) hiBits: number
+  @Field(12, { presentWhen: i => (i.hiBits < 3 || i.simple_number != undefined) }) simple_number: number | undefined
+  @Field(20, { presentWhen: i => (i.hiBits == 3 || i.large_number != undefined) }) large_number: number | undefined
+
+  static from(number: number) {
+    let eeui = new EncodableExtendedUniqueId()
+    if (number > 0x102FFF) {
+      throw `unique id is too large ${number}`
+    }
+    if (number <= 0x2FFF) {
+      eeui.simple_number = number
+    } else {
+      eeui.large_number = number - 0x3000
+    }
+    return eeui
+  }
+
+  get number() {
+    return this.simple_number != undefined ?
+      (this.hiBits << 12) + this.simple_number :
+      (this.large_number + 0x3000)
+  }
+}
+
 export class EncodableCard extends BitstreamElement {
   @Field(3) faction: number;
   @Field(5) num_in_faction: number;
   @Field(2) rarity: number;
-  @Field(16, { presentWhen: i => i.rarity == 3 }) unique_num: number | undefined;
+  @Field({ presentWhen: i => i.rarity == 3 }) unique_num: EncodableExtendedUniqueId | undefined;
 
   set_code: number;
 
   onParseFinished(): void {
     this.set_code = (this.parent.parent as EncodableSetGroup).set_code
   }
-  // @Field({ initializer: (instance, parent) => instance.set_code = parent.set_code })
-  //   set_code: number;
-  // // @Field(16, { presentWhen: i => i.rarity == 3 }) unique_num?: number;
 
   get asCardId(): CardId {
     let id = "ALT_"
@@ -35,7 +64,8 @@ export class EncodableCard extends BitstreamElement {
       case 7: id += RefFaction.Neutral; break;
     }
     id += "_"
-    if (this.num_in_faction < 10) {
+    if (this.num_in_faction < 10 && this.faction != 7) {
+      // Fun fact: Neutral card (Mana Orb) does not use 0 prefix
       id += "0"
     }
     id += this.num_in_faction
@@ -44,7 +74,7 @@ export class EncodableCard extends BitstreamElement {
       case 0: id += RefRarity.Common; break;
       case 1: id += RefRarity.Rare; break;
       case 2: id += RefRarity.RareOOF; break;
-      case 3: id += RefRarity.Unique + "_" + this.unique_num; break;
+      case 3: id += RefRarity.Unique + "_" + this.unique_num.number; break;
     }
     return id
   }
@@ -55,26 +85,28 @@ export class EncodableCard extends BitstreamElement {
     ec.faction = refEls.factionId
     ec.num_in_faction = refEls.num_in_faction
     ec.rarity = refEls.rarityId
-    ec.unique_num = refEls.uniq_num
+    ec.unique_num = EncodableExtendedUniqueId.from(refEls.uniq_num)
     return ec
   }
 }
 
 export class EncodableCardQty extends BitstreamElement {
-  @Field(2) quantity: number;
-  // @Field(6, { presentWhen: i => i.quantity == 0 }) extended_quantity?: number;
+  @Field(2, { writtenValue: i => i.quantity > 3 ? 0 : i.quantity }) quantity: number;
+  @Field(6, { presentWhen: i => (i.quantity == 0 || i.quantity > 3), writtenValue: i => i.quantity > 3 ? i.quantity - 3 : 0 }) extended_quantity?: number;
   @Field() card: EncodableCard;
 
   static from(quantity: number, card: CardId): EncodableCardQty {
     let ecq = new EncodableCardQty()
     ecq.quantity = quantity
-    //ecq.extended_quantity = quantity
     ecq.card = EncodableCard.fromId(card)
     return ecq
   }
 
   get asCardRefQty(): CardRefQty {
-    return { quantity: this.quantity, id: this.card!.asCardId }
+    return {
+      quantity: this.extended_quantity && this.extended_quantity > 0 ? this.extended_quantity + 3 : this.quantity,
+      id: this.card!.asCardId
+    }
   }
 }
 

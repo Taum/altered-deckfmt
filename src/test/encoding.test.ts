@@ -2,12 +2,42 @@ import * as fs from 'fs';
 
 import { encodeList, decodeList } from '../encoder'
 
+// Use this to debug test
+const verbose = false
+globalThis.BITSTREAM_TRACE = false
+
 const files = [
+  "src/test/decklists/test_mana_orb.txt",
+  "src/test/decklists/test_long_uniq.txt",
+  "src/test/decklists/test_extd_qty.txt",
   "src/test/decklists/list_1offs.txt",
   "src/test/decklists/list_2sets.txt",
   "src/test/decklists/list_uniques.txt",
   "src/test/decklists/list_yzmir.txt",
 ]
+
+
+function splitTrimSort(text) {
+  return text.split("\n")
+    .map((x) => x.trim())
+    .filter((x) => x != "")
+    .sort()
+}
+function verifyEqualLists(actual, expected) {
+  const actualArr = splitTrimSort(actual)
+  const expectedArr = splitTrimSort(expected)
+  if (actualArr.length != expectedArr.length) { 
+    console.log(`Length mismatch ${actualArr.length} != ${expectedArr.length}`);
+    return false
+  }
+  for (let i = 0 ; i < actualArr.length ; i++) {
+    if (actualArr[i] != expectedArr[i]) {
+      console.log(`Item[${i}] ${actualArr[i]} != ${expectedArr[i]}`);
+      return false
+    }
+  }
+  return true
+}
 
 interface Example {
   name: string
@@ -25,15 +55,22 @@ for (let file of files) {
 }
 
 for (let list of exampleLists) {
-  console.log("-----------------------------")
+  if (verbose) console.log("-----------------------------")
   console.log("- ", list.name)
-  console.log(list.contents)
+  if (verbose) console.log(list.contents)
 
   const encoded = encodeList(list.contents)
-  console.log("encoded => ", encoded)
+  if (verbose) console.log("encoded => ", encoded)
   list.encoded = encoded
 
-  console.log("Decoding back to text format:")
+  if (verbose) console.log("Decoding back to text format:")
   const decodedText = decodeList(list.encoded)
-  console.log(decodedText)
+  if (verbose) console.log(decodedText)
+
+  if (!verifyEqualLists(decodedText, list.contents)) {
+    console.log("    FAILED")
+    console.log("Encoded:", encoded)
+  } else {
+    console.log("    PASS")
+  }
 }
