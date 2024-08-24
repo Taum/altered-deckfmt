@@ -16,6 +16,15 @@ const files = [
   "src/test/decklists/list_yzmir.txt",
 ]
 
+// const expectedCodes = [
+//   "EBAQ3CN8LhA=",
+//   "EBAiFnxNJZ+cPWfv/1n8AAAWfwADlZ/DP/1n8bJAWf///8A=",
+//   "EBAQTSZQ",
+//   "ECAk0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QEuLhK1TpMGMRNlOCPRfpOROUA",
+//   "ECATFDNIdKNLNQNRZUdZFaJadcNeQISOrRSTjTwA",
+//   "EBAlmDGEeGGJWJOIKKaMOPIvqUaTOWFFzhxL9EoZxVul2pkZt5gryA==",
+//   "EBAU3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA=",
+// ]
 
 function splitTrimSort(text) {
   return text.split("\n")

@@ -19,27 +19,27 @@ Unless otherwise noted, all `int` fields represent **unsigned** integer values, 
 ```
 int(4) version
 MUST equal 1. All other values are reserved for future iterations
+
+int(8) groups_count
+The number of SetGroup entities in this deck
 ```
 
-### Set Group
+### SetGroup
 
 Cards are grouped by sets. This was done to avoid repeating set information, since a lot of cards will be from the same set.
 
 ```
-int(6) set_code
+int(8) set_code
 A code for the set. See Set in IDs section
 
-int(7) length
-The amount of CardRefQuantity entities in this group
+int(8) refs_count
+The number of CardRefQuantity entities in this group
 
-bool(1) has_more_groups
-true if more groups are following this element, false if this is the last group of the deck
-
-[length ** CardQuantity]
+[refs_count ** CardRefQuantity]
 contains the cards from this set, and their respective quantity in the deck
 ```
 
-### CardQuantity
+### CardRefQuantity
 
 Represents a card and quantity. Quantity uses a variable-length encoding (see details after definition block).
 

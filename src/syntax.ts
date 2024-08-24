@@ -111,22 +111,20 @@ export class EncodableCardQty extends BitstreamElement {
 }
 
 export class EncodableSetGroup extends BitstreamElement {
-  @Field(7) set_code: number;
-  @Field(1) has_more_groups: boolean;
+  @Field(8) set_code: number;
   @Field({ array: { type: EncodableCardQty, countFieldLength: 6 } }) cardQty: Array<EncodableCardQty>;
 
   static from(rqs: CardRefQty[], hasMore: boolean) {
     let esg = new EncodableSetGroup()
     esg.set_code = new CardRefElements(rqs[0].id).setId
     esg.cardQty = rqs.map((rq) => EncodableCardQty.from(rq.quantity, rq.id))
-    esg.has_more_groups = hasMore
     return esg
   }
 }
 
 export class EncodableDeck extends BitstreamElement {
   @Field(4) format_version: number;
-  @Field({ array: { type: EncodableSetGroup, hasMore: a => a.length > 0 ? a[a.length - 1].has_more_groups : true } }) set_groups: Array<EncodableSetGroup>;
+  @Field({ array: { type: EncodableSetGroup, countFieldLength: 8 } }) set_groups: Array<EncodableSetGroup>;
   @ReservedLow(i => (8 - (i.measure() % 8))) padding: number;
 
   static fromList(refQtyList: Array<CardRefQty>): EncodableDeck {
