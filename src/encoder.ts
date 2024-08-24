@@ -1,5 +1,7 @@
 import { EncodableDeck } from './syntax'
 import { CardRefQty } from './models'
+import { BitstreamReader } from '@astronautlabs/bitstream';
+import { Buffer } from 'buffer'
 
 export function encodeList(list: string): string {
   const lines = list.split("\n")
@@ -19,7 +21,9 @@ export function encodeList(list: string): string {
 
 export function decodeList(encoded: string): string {
   const bytes = Buffer.from(encoded, 'base64');
-  const deck = EncodableDeck.deserialize(bytes)
+  let reader = new BitstreamReader();
+  reader.addBuffer(bytes)
+  const deck = EncodableDeck.decode(reader)
   const text = deck.asCardRefQty.map((cq) => `${cq.quantity} ${cq.id}`).join("\n")
   return text
 }

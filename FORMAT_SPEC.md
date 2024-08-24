@@ -32,7 +32,7 @@ Cards are grouped by sets. This was done to avoid repeating set information, sin
 int(8) set_code
 A code for the set. See Set in IDs section
 
-int(8) refs_count
+int(6) refs_count
 The number of CardRefQuantity entities in this group
 
 [refs_count ** CardRefQuantity]

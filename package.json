@@ -18,29 +18,25 @@
     "clean": "rimraf dist dist.esm",
     "dev": "vite",
     "build": "vite build",
-    "test": "npm run build && node dist/test/encoding.test.js"
+    "build-tsc": "npm run clean && tsc -b tsconfig.build.json",
+    "test": "npm run build-tsc && node dist/test/encoding.test.js",
+    "test-dec": "npm run build-tsc && node dist/test/new-decoder.test.js"
   },
   "dependencies": {
     "@astronautlabs/bitstream": "^4.2.2",
+    "buffer": "^6.0.3",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
-    "@rollup/plugin-swc": "^0.3.1",
-    "@swc/core": "^1.2.64",
-    "@types/node": "^22.4.1",
-    "@vitejs/plugin-react-swc": "^3.7.0",
-    "@vitejs/plugin-react-swc-monorepo": "vitejs/vite-plugin-react-swc",
+    "@vitejs/plugin-react": "^4.3.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.21",
-    "ts-node": "^10.4.0",
     "typescript": "^5.3.3",
-    "vite": "^5.4.2",
-    "vue": "^3.4.38",
-    "vue-tsc": "^2.0.29"
+    "vite": "^5.4.2"
   },
   "author": "",
   "license": "MIT"
