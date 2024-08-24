@@ -105,8 +105,8 @@ This section contains the list of IDs that map with there respective plain text 
 0 is reserved for future use
 
 ```
-1 = CORE
-2 = COREKS
+1 = COREKS
+2 = CORE
 ```
 
 ### Faction

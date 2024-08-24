@@ -1,7 +1,7 @@
 var ze = Object.defineProperty;
 var Ge = (p, i, s) => i in p ? ze(p, i, { enumerable: !0, configurable: !0, writable: !0, value: s }) : p[i] = s;
 var B = (p, i, s) => Ge(p, typeof i != "symbol" ? i + "" : i, s);
-var N = /* @__PURE__ */ ((p) => (p.Axiom = "AX", p.Bravos = "BR", p.Lyra = "LY", p.Muna = "MU", p.Ordis = "OR", p.Yzmir = "YZ", p.Neutral = "NE", p))(N || {}), G = /* @__PURE__ */ ((p) => (p.Common = "C", p.Rare = "R1", p.RareOOF = "R2", p.Unique = "U", p))(G || {}), re = /* @__PURE__ */ ((p) => (p.Core = "CORE", p.CoreKS = "COREKS", p))(re || {});
+var N = /* @__PURE__ */ ((p) => (p.Axiom = "AX", p.Bravos = "BR", p.Lyra = "LY", p.Muna = "MU", p.Ordis = "OR", p.Yzmir = "YZ", p.Neutral = "NE", p))(N || {}), G = /* @__PURE__ */ ((p) => (p.Common = "C", p.Rare = "R1", p.RareOOF = "R2", p.Unique = "U", p))(G || {}), re = /* @__PURE__ */ ((p) => (p.CoreKS = "COREKS", p.Core = "CORE", p))(re || {});
 class Be {
   constructor(i) {
     B(this, "set_code");
@@ -50,9 +50,9 @@ class Be {
   }
   get setId() {
     switch (this.set_code) {
-      case "CORE":
-        return 1;
       case "COREKS":
+        return 1;
+      case "CORE":
         return 2;
     }
     throw `Unrecognized SetCode ${this.rarity}`;

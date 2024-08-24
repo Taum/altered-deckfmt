@@ -18,8 +18,8 @@ export enum RefRarity {
 
 export enum RefSetCode {
   // 0 = invalid
-  Core = "CORE",     // 1
-  CoreKS = "COREKS", // 2
+  CoreKS = "COREKS", // 1
+  Core = "CORE",     // 2
 }
 
 export type CardId = string
@@ -76,8 +76,8 @@ export class CardRefElements {
   }
   get setId(): number {
     switch (this.set_code) {
-      case RefSetCode.Core: return 1;
-      case RefSetCode.CoreKS: return 2;
+      case RefSetCode.CoreKS: return 1;
+      case RefSetCode.Core: return 2;
     }
     throw `Unrecognized SetCode ${this.rarity}`
   }

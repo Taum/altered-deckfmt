@@ -28,16 +28,12 @@ This binary format can be encoded to Base64 to share decks in URL-safe codes. As
 
 Can be encoded into the string:
 ```
-ECTcM1CsQ8dUqYi8Ysscw841m9MVy5m9U9YtgdodkA==
+EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA=
 ```
 
-This project will provide a Javascript/Typescript module that can either be imported into a NodeJS project or loaded into a web page.
+This project provides a Javascript/Typescript module that can either be imported into a NodeJS project or loaded into a web page.
 
 A format specification in available in [FORMAT_SPEC.md](FORMAT_SPEC.md).
-
-## TODOs
-
-* Cleanup module export so it's actually usable in another project.
 
 ## Usage
 
@@ -49,19 +45,19 @@ import { encodeList } from 'altered-deckfmt'
 const myList = "1 ALT_CORE_B_YZ_03_C\n3 ALT_CORE_B_BR_16_R2 ..."
 const base64deck = encodeList(myList)
 
-console.log(base64deck) // "ECTcM1CsQ8dUqYi8Ysscw841m9MVy5m9U9YtgdodkA=="
+console.log(base64deck) // "EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA="
 ```
 
 ```
 import { decodeList } from 'altered-deckfmt'
 
-const myBase64id = "ECTcM1CsQ8dUqYi8Ysscw841m9MVy5m9U9YtgdodkA=="
+const myBase64id = "EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA="
 const decklist = decodeList(myBase64id)
 
 console.log(decklist) // "1 ALT_CORE_B_YZ_03_C\n3 ALT_CORE_B_BR_16_R2 ..."
 ```
 
-### Import as a standalone script
+### Import in a web page
 
 Use the `UMD` import provided in the `dist` folder.
 See [dist-demo.html](dist-demo.html) for an example of how to use in your page.
@@ -71,6 +67,11 @@ See [dist-demo.html](dist-demo.html) for an example of how to use in your page.
 ### Install
 ```
 yarn install
+```
+
+### Development sandbox
+```
+yarn dev
 ```
 
 ### Run Tests
