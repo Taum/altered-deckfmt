@@ -61,6 +61,11 @@ const decklist = decodeList(myBase64id)
 console.log(decklist) // "1 ALT_CORE_B_YZ_03_C\n3 ALT_CORE_B_BR_16_R2 ..."
 ```
 
+### Import as a standalone script
+
+Use the `UMD` import provided in the `dist` folder.
+See [dist-demo.html](dist-demo.html) for an example of how to use in your page.
+
 ## Developement
 
 ### Install
