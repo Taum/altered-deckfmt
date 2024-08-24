@@ -22,8 +22,6 @@ export default function EncodeTest() {
 
   useEffect(() => {
     // Init with a test list
-
-    // An simple Yzmir decklist with no uniques
     setTextList(initialList)
   }, [])
 

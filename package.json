@@ -8,12 +8,6 @@
   ],
   "main": "./dist/altered-deckfmt.umd.cjs",
   "module": "./dist/altered-deckfmt.js",
-  "exports": {
-    ".": {
-      "import": "./dist/my-lib.js",
-      "require": "./dist/my-lib.umd.cjs"
-    }
-  },
   "scripts": {
     "clean": "rimraf dist dist.esm",
     "dev": "vite",
@@ -23,11 +17,10 @@
     "test-dec": "npm run build-tsc && node dist/test/new-decoder.test.js"
   },
   "dependencies": {
-    "@astronautlabs/bitstream": "^4.2.2",
-    "buffer": "^6.0.3",
-    "reflect-metadata": "^0.1.13"
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
+    "@types/node": "^22.5.0",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

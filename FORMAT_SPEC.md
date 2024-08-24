@@ -14,6 +14,8 @@ The binary string will typically be encoded using Base64 encoding to be shared i
 
 Unless otherwise noted, all `int` fields represent **unsigned** integer values, i.e. a 3-bit field contains values from 0-7 inclusive, with `(bin)000 = (dec)0` and `(bin)111 = (dec)7`
 
+All multi-bytes values are encoded in _Network Byte Order_, i.e. from most significant bit to least significant bit (a.k.a Big Endian). For instance the value `(dec)12345` on a 16-bit field is encoded as `(bin) 00110000 00111001` / `(hex) 0x3039`
+
 ### Header
 
 ```
@@ -89,31 +91,10 @@ Range 0 - 32 (for reference, core set uses range 1-30, and we expect intermediat
 int(2) rarity
 see Rarity in IDs section
 
-(Optional) UniqueId
+(Optional) int(16) UniqueId
 This MUST be present if and only if rarity == unique (int value 3)
-this field uses variable-length encoding, see UniqueId section below for details
+Range 1 - 65535
 ```
-
-### UniqueId
-
-A variable-length field for unique ID.
-
-Supports range of 0 - 12,287 using 14 bits
-Supports up to 1,060,863 using an additional byte (22 bits)
-
-1. Values from 0 to 12,287 (0x0 - 0x2FFF) inclusive are simply encoded on 14 bits as unsigned integer values
-2. Values from 12,288 to 1,060,863 (0x3000 - 0x102FFF) are represented by two initial `1` bits, followed by a 20-bit unsigned integer. Add 12,288 to the integer to get the final value.
-
-For some example of (2) :
-```
-dec   | binary
-12288 = 11 0000 0000 0000 0000 0000 (0 + 12288)
-12289 = 11 0000 0000 0000 0000 0001 (1 + 12288)
-12345 = 11 0000 0000 0000 0011 1001 (57 + 12288)
-and so on up to 11 1111 ... 1111 = (2*20-1) + 12288 = 1060863 (0xFFFFF + 0x3000 = 0x102FFF)
-```
-
-This is design is roughly inspired by UTF-8 variable-length encoding, and takes advantage of the fact that all the uniques we've seen so far as numbered below 10,000 while still keeping the door open to represent uniques up to ~1million, way more than we should ever need.
 
 ## IDs
 

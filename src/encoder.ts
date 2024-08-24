@@ -1,6 +1,7 @@
 import { EncodableDeck } from './syntax'
 import { CardRefQty } from './models'
-import { BitstreamReader } from '@astronautlabs/bitstream';
+
+import { BufferedWritable, BitstreamWriter, BitstreamReader } from './bitstream'
 import { Buffer } from 'buffer'
 
 export function encodeList(list: string): string {
@@ -14,9 +15,14 @@ export function encodeList(list: string): string {
     }
   })
 
+  const bufWriteable = new BufferedWritable()
+  const writer = new BitstreamWriter(bufWriteable, 1024)
+
   const deck = EncodableDeck.fromList(cards)
-  const buffer = deck.serialize()
-  return Buffer.from(buffer).toString('base64')
+  deck.encode(writer)
+  writer.end()
+
+  return Buffer.concat([bufWriteable.buffer]).toString('base64')
 }
 
 export function decodeList(encoded: string): string {
