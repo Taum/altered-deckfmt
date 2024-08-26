@@ -9,10 +9,10 @@
   "main": "./dist/altered-deckfmt.umd.cjs",
   "module": "./dist/altered-deckfmt.js",
   "scripts": {
-    "clean": "rimraf dist dist.esm",
+    "clean": "rimraf dist demo-site",
     "dev": "vite",
     "build": "vite build",
-    "build-tsc": "npm run clean && tsc -b tsconfig.build.json",
+    "build-site": "vite -c vite.site.config.ts build",
     "test": "npm run build-tsc && node dist/test/encoding.test.js",
     "test-dec": "npm run build-tsc && node dist/test/new-decoder.test.js"
   },
