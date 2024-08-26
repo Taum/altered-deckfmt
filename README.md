@@ -33,6 +33,8 @@ EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA=
 
 This project provides a Javascript/Typescript module that can either be imported into a NodeJS project or loaded into a web page.
 
+Demo page to encode/decode decklists: https://taum.github.io/altered-deckfmt/
+
 A format specification in available in [FORMAT_SPEC.md](FORMAT_SPEC.md).
 
 ## Usage

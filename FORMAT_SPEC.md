@@ -1,5 +1,15 @@
 # Specification for the binary format
 
+### Credits
+
+This specification originated from discussions in the Altered Programming Discord community between:
+- Taum
+- Maverick
+- Aless
+- PolluxTroy
+- xRyzZ
+- Mauc
+
 ## General structure
 
 The deck binary string is made of, in order:
