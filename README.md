@@ -77,6 +77,13 @@ yarn dev
 ```
 
 ### Run Tests
+
+Run once:
 ```
 yarn test
+```
+
+Watch mode, re-runs tests whenever source files change:
+```
+yarn test:watch
 ```

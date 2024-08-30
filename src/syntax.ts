@@ -31,6 +31,9 @@ export class EncodableCard {
     writer.write(5, this.numberInFaction)
     writer.write(2, this.rarity)
     if (this.uniqueId !== undefined) {
+      if (this.uniqueId > 0xFFFF) {
+        throw new EncodingError("Cannot encode unique ID greater than 65535")
+      }
       writer.write(16, this.uniqueId)
     }
   }
@@ -38,8 +41,8 @@ export class EncodableCard {
   get asCardId(): CardId {
     let id = "ALT_"
     switch (this.setCode) {
-      case 1: id += RefSetCode.Core; break;
-      case 2: id += RefSetCode.CoreKS; break;
+      case 1: id += RefSetCode.CoreKS; break;
+      case 2: id += RefSetCode.Core; break;
     }
     id += "_B_"
     switch (this.faction) {

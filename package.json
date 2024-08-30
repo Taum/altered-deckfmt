@@ -12,9 +12,9 @@
     "clean": "rimraf dist demo-site",
     "dev": "vite",
     "build": "vite build",
-    "build-site": "vite -c vite.site.config.ts build",
-    "test": "npm run build-tsc && node dist/test/encoding.test.js",
-    "test-dec": "npm run build-tsc && node dist/test/new-decoder.test.js"
+    "build:site": "vite -c vite.site.config.ts build",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "dependencies": {
     "buffer": "^6.0.3"
@@ -29,7 +29,8 @@
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.21",
     "typescript": "^5.3.3",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vitest": "^2.0.5"
   },
   "author": "",
   "license": "MIT"

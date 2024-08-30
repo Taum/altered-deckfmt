@@ -7,12 +7,14 @@ import { Buffer } from 'buffer'
 export function encodeList(list: string): string {
   const lines = list.split("\n")
   const cards: Array<CardRefQty> = lines.flatMap((ln) => {
-    let match = ln.trim().match(/^(\d+) (\w+)$/)
+    const match = ln.trim().match(/^(\d+) (\w+)$/)
     if (match) {
-      return [{quantity: parseInt(match[1], 10), id: match[2]}]
-    } else {
-      return []
+      const quantity = parseInt(match[1], 10)
+      if (quantity > 0) {
+        return [{quantity: parseInt(match[1], 10), id: match[2]}]
+      }
     }
+    return []
   })
 
   const bufWriteable = new BufferedWritable()
