@@ -201,8 +201,10 @@ export class EncodableDeck {
       group.encode(writer)
     }
     
-    const padding = (8 - writer.offset % 8)
-    writer.write(padding, 0)
+    if (writer.offset % 8 > 0) {
+      const padding = (8 - writer.offset % 8)
+      writer.write(padding, 0)
+    }
   }
 
   get asCardRefQty(): Array<CardRefQty> {

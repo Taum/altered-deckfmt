@@ -20,8 +20,8 @@ const expectedEncoded = {
   "test/decklists/test_mana_orb.txt": "EBAg3CN8LhA=",
   "test/decklists/test_long_uniq.txt": "EBARFnwTSWfJw9Z8wOVn///A",
   "test/decklists/test_extd_qty.txt": "EBAgTSZQ",
-  "test/decklists/list_1offs.txt": "ECAU0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QIuLhK1TpMGMRNlOCPRfpOROUA",
-  "test/decklists/list_2sets.txt": "ECAjFDNIdKNLNQNRZUdZFaJadcNeQESOrRSTjTwA", 
+  "test/decklists/list_1offs.txt": "ECAU0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QIuLhK1TpMGMRNlOCPRfpOROU=",
+  "test/decklists/list_2sets.txt": "ECAjFDNIdKNLNQNRZUdZFaJadcNeQESOrRSTjTw=", 
   "test/decklists/list_uniques.txt": "EBAVmDGEeGGJWJOIKKaMOPIvqUaTOWFFw4cS/EShnFW6XamRm3mCvIA=",
   "test/decklists/list_yzmir.txt": "EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA=",
 }
