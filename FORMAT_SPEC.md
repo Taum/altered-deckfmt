@@ -9,6 +9,7 @@ This specification originated from discussions in the Altered Programming Discor
 - PolluxTroy
 - xRyzZ
 - Mauc
+- Ajordat
 
 ## General structure
 
@@ -81,30 +82,43 @@ A card with a quantity of 0 SHOULD be omited. It CAN be represented by setting b
 
 Represents a card using the following attributes
 
+* Product
 * Faction
 * Number in faction
 * Rarity
 * (Optional) unique number
 
 This maps directly to a card ID reference, which uses the text format
-`ALT_<set>_<faction>_<number_in_faction>_<rarity>` (optionally followed with a `_<unique_number>` for uniques), e.g. `ALT_CORE_BR_03_C`
+`ALT_<set>_<product>_<faction>_<number_in_faction>_<rarity>` (optionally followed with a `_<unique_number>` for uniques), e.g. `ALT_CORE_B_BR_03_C`
 
 Note that the set is implied from the parent `SetGroup` element.
 
 ```
+int(1) booster_product
+It's 1 if the Product is a booster (_B_), 0 otherwise. If 0, `product` MUST be present.
+
+(Optional) int(2) product
+This MUST be present if and only if booster_product == 0.
+See Product in IDs section
+
 int(3) faction
-see Faction is IDs section
+See Faction in IDs section
 
 int(5) number_in_faction
 Range 0 - 32 (for reference, core set uses range 1-30, and we expect intermediate sets to be smaller).
 
 int(2) rarity
-see Rarity in IDs section
+See Rarity in IDs section
 
 (Optional) int(16) UniqueId
 This MUST be present if and only if rarity == unique (int value 3)
 Range 1 - 65535
 ```
+
+Note that the `booster_product` field is a single bit which works best for the bast majority of cards, which will be acquired through regular means (set boosters or precons).
+If the card is a promo or altered art:
+* Set the `booster_product` field to `0`.
+* Use the `product` field to indicate what type of product it is according to the Product section.
 
 ## IDs
 
@@ -117,6 +131,15 @@ This section contains the list of IDs that map with there respective plain text 
 ```
 1 = COREKS
 2 = CORE
+```
+
+### Product
+
+0 is reserved for future use
+
+```
+1 = P (Promotion: _P_)
+2 = A (AltArt: _A_)
 ```
 
 ### Faction
