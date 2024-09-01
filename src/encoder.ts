@@ -24,11 +24,11 @@ export function encodeList(list: string): string {
   deck.encode(writer)
   writer.end()
 
-  return Buffer.concat([bufWriteable.buffer]).toString('base64')
+  return Buffer.concat([bufWriteable.buffer]).toString('base64url')
 }
 
 export function decodeList(encoded: string): string {
-  const bytes = Buffer.from(encoded, 'base64');
+  const bytes = Buffer.from(encoded, 'base64url');
   let reader = new BitstreamReader();
   reader.addBuffer(bytes)
   const deck = EncodableDeck.decode(reader)

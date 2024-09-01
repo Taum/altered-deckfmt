@@ -1,20 +1,30 @@
-var ze = Object.defineProperty;
-var Ge = (p, i, s) => i in p ? ze(p, i, { enumerable: !0, configurable: !0, writable: !0, value: s }) : p[i] = s;
-var B = (p, i, s) => Ge(p, typeof i != "symbol" ? i + "" : i, s);
-var N = /* @__PURE__ */ ((p) => (p.Axiom = "AX", p.Bravos = "BR", p.Lyra = "LY", p.Muna = "MU", p.Ordis = "OR", p.Yzmir = "YZ", p.Neutral = "NE", p))(N || {}), G = /* @__PURE__ */ ((p) => (p.Common = "C", p.Rare = "R1", p.RareOOF = "R2", p.Unique = "U", p))(G || {}), re = /* @__PURE__ */ ((p) => (p.CoreKS = "COREKS", p.Core = "CORE", p))(re || {});
-class ge {
+var Gt = Object.defineProperty;
+var Yt = (p, i, s) => i in p ? Gt(p, i, { enumerable: !0, configurable: !0, writable: !0, value: s }) : p[i] = s;
+var B = (p, i, s) => Yt(p, typeof i != "symbol" ? i + "" : i, s);
+var K = /* @__PURE__ */ ((p) => (p.Booster = "B", p.Promo = "P", p.AltArt = "A", p))(K || {}), N = /* @__PURE__ */ ((p) => (p.Axiom = "AX", p.Bravos = "BR", p.Lyra = "LY", p.Muna = "MU", p.Ordis = "OR", p.Yzmir = "YZ", p.Neutral = "NE", p))(N || {}), G = /* @__PURE__ */ ((p) => (p.Common = "C", p.Rare = "R1", p.RareOOF = "R2", p.Unique = "U", p))(G || {}), it = /* @__PURE__ */ ((p) => (p.CoreKS = "COREKS", p.Core = "CORE", p))(it || {});
+class bt {
   constructor(i) {
     B(this, "set_code");
-    B(this, "b_p");
+    B(this, "product");
     B(this, "faction");
     B(this, "num_in_faction");
     B(this, "rarity");
     B(this, "uniq_num");
-    const s = i.match(/^ALT_(\w+)_(B|P)_(\w{2})_(\d{1,2})_(C|R1|R2|U)(?:_(\d+))?$/);
+    const s = i.match(/^ALT_(\w+)_(A|B|P)_(\w{2})_(\d{1,2})_(C|R1|R2|U)(?:_(\d+))?$/);
     if (!s)
       throw "unrecognized card id";
-    if (this.set_code = s[1], this.b_p = s[2] == "B" ? 0 : 1, this.faction = s[3], this.num_in_faction = parseInt(s[4], 10), this.rarity = s[5], this.uniq_num = s[6] ? parseInt(s[6]) : void 0, this.rarity == "U" && this.uniq_num == null)
+    if (this.set_code = s[1], this.product = s[2], this.faction = s[3], this.num_in_faction = parseInt(s[4], 10), this.rarity = s[5], this.uniq_num = s[6] ? parseInt(s[6]) : void 0, this.rarity == "U" && this.uniq_num == null)
       throw "unique card is missing a unique_number";
+  }
+  get productId() {
+    switch (this.product) {
+      case "B":
+        return null;
+      case "P":
+        return 1;
+      case "A":
+        return 2;
+    }
   }
   get factionId() {
     switch (this.faction) {
@@ -58,26 +68,31 @@ class ge {
     throw `Unrecognized SetCode ${this.rarity}`;
   }
 }
-class Y {
+class j {
   constructor() {
     B(this, "setCode");
+    B(this, "product");
     B(this, "faction");
     B(this, "numberInFaction");
     B(this, "rarity");
     B(this, "uniqueId");
   }
   static decode(i, s) {
-    const u = new Y();
+    const u = new j();
     if (s.setCode === void 0)
-      throw new X("Tried to decode Card without SetCode in context");
-    if (u.setCode = s.setCode, u.faction = i.readSync(3), u.faction == 0)
-      throw new X(`Invalid faction ID (${u.faction})`);
+      throw new Y("Tried to decode Card without SetCode in context");
+    if (u.setCode = s.setCode, i.readSync(1) == 1)
+      u.product = null;
+    else if (u.product = i.readSync(2), u.product == 0 || u.product == 3)
+      throw new Y(`Invalid product ID (${u.product})`);
+    if (u.faction = i.readSync(3), u.faction == 0)
+      throw new Y(`Invalid faction ID (${u.faction})`);
     return u.numberInFaction = i.readSync(5), u.rarity = i.readSync(2), u.rarity == 3 && (u.uniqueId = i.readSync(16)), u;
   }
   encode(i) {
-    if (i.write(3, this.faction), i.write(5, this.numberInFaction), i.write(2, this.rarity), this.uniqueId !== void 0) {
+    if (this.product == null ? i.write(1, 1) : (i.write(1, 0), i.write(2, this.product)), i.write(3, this.faction), i.write(5, this.numberInFaction), i.write(2, this.rarity), this.uniqueId !== void 0) {
       if (this.uniqueId > 65535)
-        throw new ie("Cannot encode unique ID greater than 65535");
+        throw new nt("Cannot encode unique ID greater than 65535");
       i.write(16, this.uniqueId);
     }
   }
@@ -85,13 +100,24 @@ class Y {
     let i = "ALT_";
     switch (this.setCode) {
       case 1:
-        i += re.CoreKS;
+        i += it.CoreKS;
         break;
       case 2:
-        i += re.Core;
+        i += it.Core;
         break;
     }
-    switch (i += "_B_", this.faction) {
+    switch (i += "_", this.product) {
+      case null:
+        i += K.Booster;
+        break;
+      case 1:
+        i += K.Promo;
+        break;
+      case 2:
+        i += K.AltArt;
+        break;
+    }
+    switch (i += "_", this.faction) {
       case 1:
         i += N.Axiom;
         break;
@@ -131,32 +157,32 @@ class Y {
     return i;
   }
   static fromId(i) {
-    let s = new Y(), u = new ge(i);
-    return s.setCode = u.setId, s.faction = u.factionId, s.numberInFaction = u.num_in_faction, s.rarity = u.rarityId, s.uniqueId = u.uniq_num, s;
+    let s = new j(), u = new bt(i);
+    return s.setCode = u.setId, s.product = u.productId, s.faction = u.factionId, s.numberInFaction = u.num_in_faction, s.rarity = u.rarityId, s.uniqueId = u.uniq_num, s;
   }
 }
-class j {
+class Q {
   constructor() {
     B(this, "quantity");
     // VLE: 2 (+6) bits
     B(this, "card");
   }
   static decode(i, s) {
-    const u = new j(), c = i.readSync(2);
+    const u = new Q(), c = i.readSync(2);
     if (c > 0)
       u.quantity = c;
     else {
       const l = i.readSync(6);
       u.quantity = l == 0 ? 0 : l + 3;
     }
-    return u.card = Y.decode(i, s), u;
+    return u.card = j.decode(i, s), u;
   }
   encode(i) {
     if (this.quantity > 0 && this.quantity <= 3)
       i.write(2, this.quantity);
     else if (this.quantity > 3) {
       if (this.quantity > 65)
-        throw new ie(`Cannot encode card quantity (${this.quantity}) greater than 65`);
+        throw new nt(`Cannot encode card quantity (${this.quantity}) greater than 65`);
       i.write(2, 0), i.write(6, this.quantity - 3);
     } else
       i.write(8, 0);
@@ -169,11 +195,11 @@ class j {
     };
   }
   static from(i, s) {
-    let u = new j();
-    return u.quantity = i, u.card = Y.fromId(s), u;
+    let u = new Q();
+    return u.quantity = i, u.card = j.fromId(s), u;
   }
 }
-class Q {
+class W {
   constructor() {
     B(this, "setCode");
     // 8 bits
@@ -181,26 +207,26 @@ class Q {
   }
   // count: 6 bits
   static decode(i, s) {
-    const u = new Q();
+    const u = new W();
     if (u.setCode = i.readSync(8), u.setCode == 0)
-      throw new X(`Invalid SetCode ID (${u.setCode})`);
+      throw new Y(`Invalid SetCode ID (${u.setCode})`);
     s.setCode = u.setCode;
     const c = i.readSync(6), l = new Array();
     for (let d = 0; d < c; d++)
-      l.push(j.decode(i, s));
+      l.push(Q.decode(i, s));
     return u.cardQty = l, s.setCode = void 0, u;
   }
   encode(i) {
     if (this.cardQty.length <= 0)
-      throw new ie("Cannot encode a SetGroup with 0 cards");
+      throw new nt("Cannot encode a SetGroup with 0 cards");
     const s = this.cardQty[0].card.setCode;
     i.write(8, s), i.write(6, this.cardQty.length);
     for (let u of this.cardQty)
       u.encode(i);
   }
   static from(i) {
-    let s = new Q();
-    return s.cardQty = i.map((u) => j.from(u.quantity, u.id)), s;
+    let s = new W();
+    return s.cardQty = i.map((u) => Q.from(u.quantity, u.id)), s;
   }
 }
 class D {
@@ -211,64 +237,66 @@ class D {
   }
   // count: 8 bits
   static decode(i) {
-    const s = new D(), u = new Ye();
+    const s = new D(), u = new jt();
     if (s.version = i.readSync(4), s.version !== 1)
-      throw new X(`Invalid version (${s.version}`);
+      throw new Y(`Invalid version (${s.version}`);
     const c = i.readSync(8), l = new Array();
     for (let d = 0; d < c; d++)
-      l.push(Q.decode(i, u));
+      l.push(W.decode(i, u));
     return s.setGroups = l, s;
   }
   encode(i) {
     i.write(4, this.version), i.write(8, this.setGroups.length);
-    for (let u of this.setGroups)
-      u.encode(i);
-    const s = 8 - i.offset % 8;
-    i.write(s, 0);
+    for (let s of this.setGroups)
+      s.encode(i);
+    if (i.offset % 8 > 0) {
+      const s = 8 - i.offset % 8;
+      i.write(s, 0);
+    }
   }
   get asCardRefQty() {
     return this.setGroups.reduce((i, s) => i.concat(s.cardQty.map((u) => u.asCardRefQty)), Array());
   }
   static fromList(i) {
-    const s = D.groupedBySet(i).map((c) => Q.from(c));
+    const s = D.groupedBySet(i).map((c) => W.from(c));
     let u = new D();
     return u.version = 1, u.setGroups = s, u;
   }
   static groupedBySet(i) {
     let s = /* @__PURE__ */ new Map();
     for (let u of i) {
-      const c = new ge(u.id).set_code;
+      const c = new bt(u.id).set_code;
       let l = s.get(c);
       l || (l = [], s.set(c, l)), l.push(u);
     }
     return Array.from(s, ([u, c]) => c);
   }
 }
-class Ye {
+class jt {
   constructor() {
     B(this, "setCode");
   }
 }
-class X extends Error {
+class Y extends Error {
   constructor(i) {
     super(i), this.name = "DecodingError";
   }
 }
-class ie extends Error {
+class nt extends Error {
   constructor(i) {
     super(i), this.name = "EncodingError";
   }
 }
-var K = {}, H = {};
-H.byteLength = We;
-H.toByteArray = Xe;
-H.fromByteArray = Je;
-var L = [], R = [], je = typeof Uint8Array < "u" ? Uint8Array : Array, te = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-for (var P = 0, Qe = te.length; P < Qe; ++P)
-  L[P] = te[P], R[te.charCodeAt(P)] = P;
+var H = {}, J = {};
+J.byteLength = Vt;
+J.toByteArray = Kt;
+J.fromByteArray = Zt;
+var L = [], R = [], Qt = typeof Uint8Array < "u" ? Uint8Array : Array, rt = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+for (var P = 0, Wt = rt.length; P < Wt; ++P)
+  L[P] = rt[P], R[rt.charCodeAt(P)] = P;
 R[45] = 62;
 R[95] = 63;
-function be(p) {
+function xt(p) {
   var i = p.length;
   if (i % 4 > 0)
     throw new Error("Invalid string. Length must be a multiple of 4");
@@ -277,41 +305,41 @@ function be(p) {
   var u = s === i ? 0 : 4 - s % 4;
   return [s, u];
 }
-function We(p) {
-  var i = be(p), s = i[0], u = i[1];
+function Vt(p) {
+  var i = xt(p), s = i[0], u = i[1];
   return (s + u) * 3 / 4 - u;
 }
-function Ve(p, i, s) {
+function Xt(p, i, s) {
   return (i + s) * 3 / 4 - s;
 }
-function Xe(p) {
-  var i, s = be(p), u = s[0], c = s[1], l = new je(Ve(p, u, c)), d = 0, o = c > 0 ? u - 4 : u, y;
+function Kt(p) {
+  var i, s = xt(p), u = s[0], c = s[1], l = new Qt(Xt(p, u, c)), d = 0, o = c > 0 ? u - 4 : u, y;
   for (y = 0; y < o; y += 4)
     i = R[p.charCodeAt(y)] << 18 | R[p.charCodeAt(y + 1)] << 12 | R[p.charCodeAt(y + 2)] << 6 | R[p.charCodeAt(y + 3)], l[d++] = i >> 16 & 255, l[d++] = i >> 8 & 255, l[d++] = i & 255;
   return c === 2 && (i = R[p.charCodeAt(y)] << 2 | R[p.charCodeAt(y + 1)] >> 4, l[d++] = i & 255), c === 1 && (i = R[p.charCodeAt(y)] << 10 | R[p.charCodeAt(y + 1)] << 4 | R[p.charCodeAt(y + 2)] >> 2, l[d++] = i >> 8 & 255, l[d++] = i & 255), l;
 }
-function Ke(p) {
+function Ht(p) {
   return L[p >> 18 & 63] + L[p >> 12 & 63] + L[p >> 6 & 63] + L[p & 63];
 }
-function He(p, i, s) {
+function Jt(p, i, s) {
   for (var u, c = [], l = i; l < s; l += 3)
-    u = (p[l] << 16 & 16711680) + (p[l + 1] << 8 & 65280) + (p[l + 2] & 255), c.push(Ke(u));
+    u = (p[l] << 16 & 16711680) + (p[l + 1] << 8 & 65280) + (p[l + 2] & 255), c.push(Ht(u));
   return c.join("");
 }
-function Je(p) {
+function Zt(p) {
   for (var i, s = p.length, u = s % 3, c = [], l = 16383, d = 0, o = s - u; d < o; d += l)
-    c.push(He(p, d, d + l > o ? o : d + l));
+    c.push(Jt(p, d, d + l > o ? o : d + l));
   return u === 1 ? (i = p[s - 1], c.push(
     L[i >> 2] + L[i << 4 & 63] + "=="
   )) : u === 2 && (i = (p[s - 2] << 8) + p[s - 1], c.push(
     L[i >> 10] + L[i >> 4 & 63] + L[i << 2 & 63] + "="
   )), c.join("");
 }
-var ne = {};
+var st = {};
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
-ne.read = function(p, i, s, u, c) {
-  var l, d, o = c * 8 - u - 1, y = (1 << o) - 1, b = y >> 1, x = -7, g = s ? c - 1 : 0, F = s ? -1 : 1, A = p[i + g];
-  for (g += F, l = A & (1 << -x) - 1, A >>= -x, x += o; x > 0; l = l * 256 + p[i + g], g += F, x -= 8)
+st.read = function(p, i, s, u, c) {
+  var l, d, o = c * 8 - u - 1, y = (1 << o) - 1, b = y >> 1, x = -7, g = s ? c - 1 : 0, F = s ? -1 : 1, _ = p[i + g];
+  for (g += F, l = _ & (1 << -x) - 1, _ >>= -x, x += o; x > 0; l = l * 256 + p[i + g], g += F, x -= 8)
     ;
   for (d = l & (1 << -x) - 1, l >>= -x, x += u; x > 0; d = d * 256 + p[i + g], g += F, x -= 8)
     ;
@@ -319,18 +347,18 @@ ne.read = function(p, i, s, u, c) {
     l = 1 - b;
   else {
     if (l === y)
-      return d ? NaN : (A ? -1 : 1) * (1 / 0);
+      return d ? NaN : (_ ? -1 : 1) * (1 / 0);
     d = d + Math.pow(2, u), l = l - b;
   }
-  return (A ? -1 : 1) * d * Math.pow(2, l - u);
+  return (_ ? -1 : 1) * d * Math.pow(2, l - u);
 };
-ne.write = function(p, i, s, u, c, l) {
-  var d, o, y, b = l * 8 - c - 1, x = (1 << b) - 1, g = x >> 1, F = c === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0, A = u ? 0 : l - 1, S = u ? 1 : -1, T = i < 0 || i === 0 && 1 / i < 0 ? 1 : 0;
-  for (i = Math.abs(i), isNaN(i) || i === 1 / 0 ? (o = isNaN(i) ? 1 : 0, d = x) : (d = Math.floor(Math.log(i) / Math.LN2), i * (y = Math.pow(2, -d)) < 1 && (d--, y *= 2), d + g >= 1 ? i += F / y : i += F * Math.pow(2, 1 - g), i * y >= 2 && (d++, y /= 2), d + g >= x ? (o = 0, d = x) : d + g >= 1 ? (o = (i * y - 1) * Math.pow(2, c), d = d + g) : (o = i * Math.pow(2, g - 1) * Math.pow(2, c), d = 0)); c >= 8; p[s + A] = o & 255, A += S, o /= 256, c -= 8)
+st.write = function(p, i, s, u, c, l) {
+  var d, o, y, b = l * 8 - c - 1, x = (1 << b) - 1, g = x >> 1, F = c === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0, _ = u ? 0 : l - 1, S = u ? 1 : -1, T = i < 0 || i === 0 && 1 / i < 0 ? 1 : 0;
+  for (i = Math.abs(i), isNaN(i) || i === 1 / 0 ? (o = isNaN(i) ? 1 : 0, d = x) : (d = Math.floor(Math.log(i) / Math.LN2), i * (y = Math.pow(2, -d)) < 1 && (d--, y *= 2), d + g >= 1 ? i += F / y : i += F * Math.pow(2, 1 - g), i * y >= 2 && (d++, y /= 2), d + g >= x ? (o = 0, d = x) : d + g >= 1 ? (o = (i * y - 1) * Math.pow(2, c), d = d + g) : (o = i * Math.pow(2, g - 1) * Math.pow(2, c), d = 0)); c >= 8; p[s + _] = o & 255, _ += S, o /= 256, c -= 8)
     ;
-  for (d = d << c | o, b += c; b > 0; p[s + A] = d & 255, A += S, d /= 256, b -= 8)
+  for (d = d << c | o, b += c; b > 0; p[s + _] = d & 255, _ += S, d /= 256, b -= 8)
     ;
-  p[s + A - S] |= T * 128;
+  p[s + _ - S] |= T * 128;
 };
 /*!
  * The buffer module from node.js, for the browser.
@@ -339,18 +367,18 @@ ne.write = function(p, i, s, u, c, l) {
  * @license  MIT
  */
 (function(p) {
-  const i = H, s = ne, u = typeof Symbol == "function" && typeof Symbol.for == "function" ? Symbol.for("nodejs.util.inspect.custom") : null;
-  p.Buffer = o, p.SlowBuffer = me, p.INSPECT_MAX_BYTES = 50;
+  const i = J, s = st, u = typeof Symbol == "function" && typeof Symbol.for == "function" ? Symbol.for("nodejs.util.inspect.custom") : null;
+  p.Buffer = o, p.SlowBuffer = It, p.INSPECT_MAX_BYTES = 50;
   const c = 2147483647;
   p.kMaxLength = c, o.TYPED_ARRAY_SUPPORT = l(), !o.TYPED_ARRAY_SUPPORT && typeof console < "u" && typeof console.error == "function" && console.error(
     "This browser lacks typed array (Uint8Array) support which is required by `buffer` v5.x. Use `buffer` v4.x if you require old browser support."
   );
   function l() {
     try {
-      const r = new Uint8Array(1), e = { foo: function() {
+      const r = new Uint8Array(1), t = { foo: function() {
         return 42;
       } };
-      return Object.setPrototypeOf(e, Uint8Array.prototype), Object.setPrototypeOf(r, e), r.foo() === 42;
+      return Object.setPrototypeOf(t, Uint8Array.prototype), Object.setPrototypeOf(r, t), r.foo() === 42;
     } catch {
       return !1;
     }
@@ -371,23 +399,23 @@ ne.write = function(p, i, s, u, c, l) {
   function d(r) {
     if (r > c)
       throw new RangeError('The value "' + r + '" is invalid for option "size"');
-    const e = new Uint8Array(r);
-    return Object.setPrototypeOf(e, o.prototype), e;
+    const t = new Uint8Array(r);
+    return Object.setPrototypeOf(t, o.prototype), t;
   }
-  function o(r, e, t) {
+  function o(r, t, e) {
     if (typeof r == "number") {
-      if (typeof e == "string")
+      if (typeof t == "string")
         throw new TypeError(
           'The "string" argument must be of type string. Received type number'
         );
       return g(r);
     }
-    return y(r, e, t);
+    return y(r, t, e);
   }
   o.poolSize = 8192;
-  function y(r, e, t) {
+  function y(r, t, e) {
     if (typeof r == "string")
-      return F(r, e);
+      return F(r, t);
     if (ArrayBuffer.isView(r))
       return S(r);
     if (r == null)
@@ -395,24 +423,24 @@ ne.write = function(p, i, s, u, c, l) {
         "The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type " + typeof r
       );
     if (k(r, ArrayBuffer) || r && k(r.buffer, ArrayBuffer) || typeof SharedArrayBuffer < "u" && (k(r, SharedArrayBuffer) || r && k(r.buffer, SharedArrayBuffer)))
-      return T(r, e, t);
+      return T(r, t, e);
     if (typeof r == "number")
       throw new TypeError(
         'The "value" argument must not be of type number. Received type number'
       );
     const n = r.valueOf && r.valueOf();
     if (n != null && n !== r)
-      return o.from(n, e, t);
-    const f = xe(r);
+      return o.from(n, t, e);
+    const f = mt(r);
     if (f) return f;
     if (typeof Symbol < "u" && Symbol.toPrimitive != null && typeof r[Symbol.toPrimitive] == "function")
-      return o.from(r[Symbol.toPrimitive]("string"), e, t);
+      return o.from(r[Symbol.toPrimitive]("string"), t, e);
     throw new TypeError(
       "The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type " + typeof r
     );
   }
-  o.from = function(r, e, t) {
-    return y(r, e, t);
+  o.from = function(r, t, e) {
+    return y(r, t, e);
   }, Object.setPrototypeOf(o.prototype, Uint8Array.prototype), Object.setPrototypeOf(o, Uint8Array);
   function b(r) {
     if (typeof r != "number")
@@ -420,84 +448,84 @@ ne.write = function(p, i, s, u, c, l) {
     if (r < 0)
       throw new RangeError('The value "' + r + '" is invalid for option "size"');
   }
-  function x(r, e, t) {
-    return b(r), r <= 0 ? d(r) : e !== void 0 ? typeof t == "string" ? d(r).fill(e, t) : d(r).fill(e) : d(r);
+  function x(r, t, e) {
+    return b(r), r <= 0 ? d(r) : t !== void 0 ? typeof e == "string" ? d(r).fill(t, e) : d(r).fill(t) : d(r);
   }
-  o.alloc = function(r, e, t) {
-    return x(r, e, t);
+  o.alloc = function(r, t, e) {
+    return x(r, t, e);
   };
   function g(r) {
-    return b(r), d(r < 0 ? 0 : J(r) | 0);
+    return b(r), d(r < 0 ? 0 : Z(r) | 0);
   }
   o.allocUnsafe = function(r) {
     return g(r);
   }, o.allocUnsafeSlow = function(r) {
     return g(r);
   };
-  function F(r, e) {
-    if ((typeof e != "string" || e === "") && (e = "utf8"), !o.isEncoding(e))
-      throw new TypeError("Unknown encoding: " + e);
-    const t = se(r, e) | 0;
-    let n = d(t);
-    const f = n.write(r, e);
-    return f !== t && (n = n.slice(0, f)), n;
+  function F(r, t) {
+    if ((typeof t != "string" || t === "") && (t = "utf8"), !o.isEncoding(t))
+      throw new TypeError("Unknown encoding: " + t);
+    const e = ot(r, t) | 0;
+    let n = d(e);
+    const f = n.write(r, t);
+    return f !== e && (n = n.slice(0, f)), n;
   }
-  function A(r) {
-    const e = r.length < 0 ? 0 : J(r.length) | 0, t = d(e);
-    for (let n = 0; n < e; n += 1)
-      t[n] = r[n] & 255;
-    return t;
+  function _(r) {
+    const t = r.length < 0 ? 0 : Z(r.length) | 0, e = d(t);
+    for (let n = 0; n < t; n += 1)
+      e[n] = r[n] & 255;
+    return e;
   }
   function S(r) {
     if (k(r, Uint8Array)) {
-      const e = new Uint8Array(r);
-      return T(e.buffer, e.byteOffset, e.byteLength);
+      const t = new Uint8Array(r);
+      return T(t.buffer, t.byteOffset, t.byteLength);
     }
-    return A(r);
+    return _(r);
   }
-  function T(r, e, t) {
-    if (e < 0 || r.byteLength < e)
+  function T(r, t, e) {
+    if (t < 0 || r.byteLength < t)
       throw new RangeError('"offset" is outside of buffer bounds');
-    if (r.byteLength < e + (t || 0))
+    if (r.byteLength < t + (e || 0))
       throw new RangeError('"length" is outside of buffer bounds');
     let n;
-    return e === void 0 && t === void 0 ? n = new Uint8Array(r) : t === void 0 ? n = new Uint8Array(r, e) : n = new Uint8Array(r, e, t), Object.setPrototypeOf(n, o.prototype), n;
+    return t === void 0 && e === void 0 ? n = new Uint8Array(r) : e === void 0 ? n = new Uint8Array(r, t) : n = new Uint8Array(r, t, e), Object.setPrototypeOf(n, o.prototype), n;
   }
-  function xe(r) {
+  function mt(r) {
     if (o.isBuffer(r)) {
-      const e = J(r.length) | 0, t = d(e);
-      return t.length === 0 || r.copy(t, 0, 0, e), t;
+      const t = Z(r.length) | 0, e = d(t);
+      return e.length === 0 || r.copy(e, 0, 0, t), e;
     }
     if (r.length !== void 0)
-      return typeof r.length != "number" || ee(r.length) ? d(0) : A(r);
+      return typeof r.length != "number" || et(r.length) ? d(0) : _(r);
     if (r.type === "Buffer" && Array.isArray(r.data))
-      return A(r.data);
+      return _(r.data);
   }
-  function J(r) {
+  function Z(r) {
     if (r >= c)
       throw new RangeError("Attempt to allocate Buffer larger than maximum size: 0x" + c.toString(16) + " bytes");
     return r | 0;
   }
-  function me(r) {
+  function It(r) {
     return +r != r && (r = 0), o.alloc(+r);
   }
-  o.isBuffer = function(e) {
-    return e != null && e._isBuffer === !0 && e !== o.prototype;
-  }, o.compare = function(e, t) {
-    if (k(e, Uint8Array) && (e = o.from(e, e.offset, e.byteLength)), k(t, Uint8Array) && (t = o.from(t, t.offset, t.byteLength)), !o.isBuffer(e) || !o.isBuffer(t))
+  o.isBuffer = function(t) {
+    return t != null && t._isBuffer === !0 && t !== o.prototype;
+  }, o.compare = function(t, e) {
+    if (k(t, Uint8Array) && (t = o.from(t, t.offset, t.byteLength)), k(e, Uint8Array) && (e = o.from(e, e.offset, e.byteLength)), !o.isBuffer(t) || !o.isBuffer(e))
       throw new TypeError(
         'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
       );
-    if (e === t) return 0;
-    let n = e.length, f = t.length;
+    if (t === e) return 0;
+    let n = t.length, f = e.length;
     for (let h = 0, a = Math.min(n, f); h < a; ++h)
-      if (e[h] !== t[h]) {
-        n = e[h], f = t[h];
+      if (t[h] !== e[h]) {
+        n = t[h], f = e[h];
         break;
       }
     return n < f ? -1 : f < n ? 1 : 0;
-  }, o.isEncoding = function(e) {
-    switch (String(e).toLowerCase()) {
+  }, o.isEncoding = function(t) {
+    switch (String(t).toLowerCase()) {
       case "hex":
       case "utf8":
       case "utf-8":
@@ -513,19 +541,19 @@ ne.write = function(p, i, s, u, c, l) {
       default:
         return !1;
     }
-  }, o.concat = function(e, t) {
-    if (!Array.isArray(e))
+  }, o.concat = function(t, e) {
+    if (!Array.isArray(t))
       throw new TypeError('"list" argument must be an Array of Buffers');
-    if (e.length === 0)
+    if (t.length === 0)
       return o.alloc(0);
     let n;
-    if (t === void 0)
-      for (t = 0, n = 0; n < e.length; ++n)
-        t += e[n].length;
-    const f = o.allocUnsafe(t);
+    if (e === void 0)
+      for (e = 0, n = 0; n < t.length; ++n)
+        e += t[n].length;
+    const f = o.allocUnsafe(e);
     let h = 0;
-    for (n = 0; n < e.length; ++n) {
-      let a = e[n];
+    for (n = 0; n < t.length; ++n) {
+      let a = t[n];
       if (k(a, Uint8Array))
         h + a.length > f.length ? (o.isBuffer(a) || (a = o.from(a)), a.copy(f, h)) : Uint8Array.prototype.set.call(
           f,
@@ -540,7 +568,7 @@ ne.write = function(p, i, s, u, c, l) {
     }
     return f;
   };
-  function se(r, e) {
+  function ot(r, t) {
     if (o.isBuffer(r))
       return r.length;
     if (ArrayBuffer.isView(r) || k(r, ArrayBuffer))
@@ -549,232 +577,232 @@ ne.write = function(p, i, s, u, c, l) {
       throw new TypeError(
         'The "string" argument must be one of type string, Buffer, or ArrayBuffer. Received type ' + typeof r
       );
-    const t = r.length, n = arguments.length > 2 && arguments[2] === !0;
-    if (!n && t === 0) return 0;
+    const e = r.length, n = arguments.length > 2 && arguments[2] === !0;
+    if (!n && e === 0) return 0;
     let f = !1;
     for (; ; )
-      switch (e) {
+      switch (t) {
         case "ascii":
         case "latin1":
         case "binary":
-          return t;
+          return e;
         case "utf8":
         case "utf-8":
-          return v(r).length;
+          return tt(r).length;
         case "ucs2":
         case "ucs-2":
         case "utf16le":
         case "utf-16le":
-          return t * 2;
+          return e * 2;
         case "hex":
-          return t >>> 1;
+          return e >>> 1;
         case "base64":
-          return Be(r).length;
+          return gt(r).length;
         default:
           if (f)
-            return n ? -1 : v(r).length;
-          e = ("" + e).toLowerCase(), f = !0;
+            return n ? -1 : tt(r).length;
+          t = ("" + t).toLowerCase(), f = !0;
       }
   }
-  o.byteLength = se;
-  function Ie(r, e, t) {
+  o.byteLength = ot;
+  function Et(r, t, e) {
     let n = !1;
-    if ((e === void 0 || e < 0) && (e = 0), e > this.length || ((t === void 0 || t > this.length) && (t = this.length), t <= 0) || (t >>>= 0, e >>>= 0, t <= e))
+    if ((t === void 0 || t < 0) && (t = 0), t > this.length || ((e === void 0 || e > this.length) && (e = this.length), e <= 0) || (e >>>= 0, t >>>= 0, e <= t))
       return "";
     for (r || (r = "utf8"); ; )
       switch (r) {
         case "hex":
-          return Le(this, e, t);
+          return Tt(this, t, e);
         case "utf8":
         case "utf-8":
-          return ue(this, e, t);
+          return ht(this, t, e);
         case "ascii":
-          return Re(this, e, t);
+          return kt(this, t, e);
         case "latin1":
         case "binary":
-          return ke(this, e, t);
+          return Lt(this, t, e);
         case "base64":
-          return Se(this, e, t);
+          return Ct(this, t, e);
         case "ucs2":
         case "ucs-2":
         case "utf16le":
         case "utf-16le":
-          return Te(this, e, t);
+          return $t(this, t, e);
         default:
           if (n) throw new TypeError("Unknown encoding: " + r);
           r = (r + "").toLowerCase(), n = !0;
       }
   }
   o.prototype._isBuffer = !0;
-  function q(r, e, t) {
-    const n = r[e];
-    r[e] = r[t], r[t] = n;
+  function q(r, t, e) {
+    const n = r[t];
+    r[t] = r[e], r[e] = n;
   }
   o.prototype.swap16 = function() {
-    const e = this.length;
-    if (e % 2 !== 0)
+    const t = this.length;
+    if (t % 2 !== 0)
       throw new RangeError("Buffer size must be a multiple of 16-bits");
-    for (let t = 0; t < e; t += 2)
-      q(this, t, t + 1);
+    for (let e = 0; e < t; e += 2)
+      q(this, e, e + 1);
     return this;
   }, o.prototype.swap32 = function() {
-    const e = this.length;
-    if (e % 4 !== 0)
+    const t = this.length;
+    if (t % 4 !== 0)
       throw new RangeError("Buffer size must be a multiple of 32-bits");
-    for (let t = 0; t < e; t += 4)
-      q(this, t, t + 3), q(this, t + 1, t + 2);
+    for (let e = 0; e < t; e += 4)
+      q(this, e, e + 3), q(this, e + 1, e + 2);
     return this;
   }, o.prototype.swap64 = function() {
-    const e = this.length;
-    if (e % 8 !== 0)
+    const t = this.length;
+    if (t % 8 !== 0)
       throw new RangeError("Buffer size must be a multiple of 64-bits");
-    for (let t = 0; t < e; t += 8)
-      q(this, t, t + 7), q(this, t + 1, t + 6), q(this, t + 2, t + 5), q(this, t + 3, t + 4);
+    for (let e = 0; e < t; e += 8)
+      q(this, e, e + 7), q(this, e + 1, e + 6), q(this, e + 2, e + 5), q(this, e + 3, e + 4);
     return this;
   }, o.prototype.toString = function() {
-    const e = this.length;
-    return e === 0 ? "" : arguments.length === 0 ? ue(this, 0, e) : Ie.apply(this, arguments);
-  }, o.prototype.toLocaleString = o.prototype.toString, o.prototype.equals = function(e) {
-    if (!o.isBuffer(e)) throw new TypeError("Argument must be a Buffer");
-    return this === e ? !0 : o.compare(this, e) === 0;
+    const t = this.length;
+    return t === 0 ? "" : arguments.length === 0 ? ht(this, 0, t) : Et.apply(this, arguments);
+  }, o.prototype.toLocaleString = o.prototype.toString, o.prototype.equals = function(t) {
+    if (!o.isBuffer(t)) throw new TypeError("Argument must be a Buffer");
+    return this === t ? !0 : o.compare(this, t) === 0;
   }, o.prototype.inspect = function() {
-    let e = "";
-    const t = p.INSPECT_MAX_BYTES;
-    return e = this.toString("hex", 0, t).replace(/(.{2})/g, "$1 ").trim(), this.length > t && (e += " ... "), "<Buffer " + e + ">";
-  }, u && (o.prototype[u] = o.prototype.inspect), o.prototype.compare = function(e, t, n, f, h) {
-    if (k(e, Uint8Array) && (e = o.from(e, e.offset, e.byteLength)), !o.isBuffer(e))
+    let t = "";
+    const e = p.INSPECT_MAX_BYTES;
+    return t = this.toString("hex", 0, e).replace(/(.{2})/g, "$1 ").trim(), this.length > e && (t += " ... "), "<Buffer " + t + ">";
+  }, u && (o.prototype[u] = o.prototype.inspect), o.prototype.compare = function(t, e, n, f, h) {
+    if (k(t, Uint8Array) && (t = o.from(t, t.offset, t.byteLength)), !o.isBuffer(t))
       throw new TypeError(
-        'The "target" argument must be one of type Buffer or Uint8Array. Received type ' + typeof e
+        'The "target" argument must be one of type Buffer or Uint8Array. Received type ' + typeof t
       );
-    if (t === void 0 && (t = 0), n === void 0 && (n = e ? e.length : 0), f === void 0 && (f = 0), h === void 0 && (h = this.length), t < 0 || n > e.length || f < 0 || h > this.length)
+    if (e === void 0 && (e = 0), n === void 0 && (n = t ? t.length : 0), f === void 0 && (f = 0), h === void 0 && (h = this.length), e < 0 || n > t.length || f < 0 || h > this.length)
       throw new RangeError("out of range index");
-    if (f >= h && t >= n)
+    if (f >= h && e >= n)
       return 0;
     if (f >= h)
       return -1;
-    if (t >= n)
+    if (e >= n)
       return 1;
-    if (t >>>= 0, n >>>= 0, f >>>= 0, h >>>= 0, this === e) return 0;
-    let a = h - f, w = n - t;
-    const E = Math.min(a, w), I = this.slice(f, h), _ = e.slice(t, n);
+    if (e >>>= 0, n >>>= 0, f >>>= 0, h >>>= 0, this === t) return 0;
+    let a = h - f, w = n - e;
+    const E = Math.min(a, w), I = this.slice(f, h), A = t.slice(e, n);
     for (let m = 0; m < E; ++m)
-      if (I[m] !== _[m]) {
-        a = I[m], w = _[m];
+      if (I[m] !== A[m]) {
+        a = I[m], w = A[m];
         break;
       }
     return a < w ? -1 : w < a ? 1 : 0;
   };
-  function oe(r, e, t, n, f) {
+  function ft(r, t, e, n, f) {
     if (r.length === 0) return -1;
-    if (typeof t == "string" ? (n = t, t = 0) : t > 2147483647 ? t = 2147483647 : t < -2147483648 && (t = -2147483648), t = +t, ee(t) && (t = f ? 0 : r.length - 1), t < 0 && (t = r.length + t), t >= r.length) {
+    if (typeof e == "string" ? (n = e, e = 0) : e > 2147483647 ? e = 2147483647 : e < -2147483648 && (e = -2147483648), e = +e, et(e) && (e = f ? 0 : r.length - 1), e < 0 && (e = r.length + e), e >= r.length) {
       if (f) return -1;
-      t = r.length - 1;
-    } else if (t < 0)
-      if (f) t = 0;
+      e = r.length - 1;
+    } else if (e < 0)
+      if (f) e = 0;
       else return -1;
-    if (typeof e == "string" && (e = o.from(e, n)), o.isBuffer(e))
-      return e.length === 0 ? -1 : fe(r, e, t, n, f);
-    if (typeof e == "number")
-      return e = e & 255, typeof Uint8Array.prototype.indexOf == "function" ? f ? Uint8Array.prototype.indexOf.call(r, e, t) : Uint8Array.prototype.lastIndexOf.call(r, e, t) : fe(r, [e], t, n, f);
+    if (typeof t == "string" && (t = o.from(t, n)), o.isBuffer(t))
+      return t.length === 0 ? -1 : ut(r, t, e, n, f);
+    if (typeof t == "number")
+      return t = t & 255, typeof Uint8Array.prototype.indexOf == "function" ? f ? Uint8Array.prototype.indexOf.call(r, t, e) : Uint8Array.prototype.lastIndexOf.call(r, t, e) : ut(r, [t], e, n, f);
     throw new TypeError("val must be string, number or Buffer");
   }
-  function fe(r, e, t, n, f) {
-    let h = 1, a = r.length, w = e.length;
+  function ut(r, t, e, n, f) {
+    let h = 1, a = r.length, w = t.length;
     if (n !== void 0 && (n = String(n).toLowerCase(), n === "ucs2" || n === "ucs-2" || n === "utf16le" || n === "utf-16le")) {
-      if (r.length < 2 || e.length < 2)
+      if (r.length < 2 || t.length < 2)
         return -1;
-      h = 2, a /= 2, w /= 2, t /= 2;
+      h = 2, a /= 2, w /= 2, e /= 2;
     }
-    function E(_, m) {
-      return h === 1 ? _[m] : _.readUInt16BE(m * h);
+    function E(A, m) {
+      return h === 1 ? A[m] : A.readUInt16BE(m * h);
     }
     let I;
     if (f) {
-      let _ = -1;
-      for (I = t; I < a; I++)
-        if (E(r, I) === E(e, _ === -1 ? 0 : I - _)) {
-          if (_ === -1 && (_ = I), I - _ + 1 === w) return _ * h;
+      let A = -1;
+      for (I = e; I < a; I++)
+        if (E(r, I) === E(t, A === -1 ? 0 : I - A)) {
+          if (A === -1 && (A = I), I - A + 1 === w) return A * h;
         } else
-          _ !== -1 && (I -= I - _), _ = -1;
+          A !== -1 && (I -= I - A), A = -1;
     } else
-      for (t + w > a && (t = a - w), I = t; I >= 0; I--) {
-        let _ = !0;
+      for (e + w > a && (e = a - w), I = e; I >= 0; I--) {
+        let A = !0;
         for (let m = 0; m < w; m++)
-          if (E(r, I + m) !== E(e, m)) {
-            _ = !1;
+          if (E(r, I + m) !== E(t, m)) {
+            A = !1;
             break;
           }
-        if (_) return I;
+        if (A) return I;
       }
     return -1;
   }
-  o.prototype.includes = function(e, t, n) {
-    return this.indexOf(e, t, n) !== -1;
-  }, o.prototype.indexOf = function(e, t, n) {
-    return oe(this, e, t, n, !0);
-  }, o.prototype.lastIndexOf = function(e, t, n) {
-    return oe(this, e, t, n, !1);
+  o.prototype.includes = function(t, e, n) {
+    return this.indexOf(t, e, n) !== -1;
+  }, o.prototype.indexOf = function(t, e, n) {
+    return ft(this, t, e, n, !0);
+  }, o.prototype.lastIndexOf = function(t, e, n) {
+    return ft(this, t, e, n, !1);
   };
-  function Ee(r, e, t, n) {
-    t = Number(t) || 0;
-    const f = r.length - t;
+  function At(r, t, e, n) {
+    e = Number(e) || 0;
+    const f = r.length - e;
     n ? (n = Number(n), n > f && (n = f)) : n = f;
-    const h = e.length;
+    const h = t.length;
     n > h / 2 && (n = h / 2);
     let a;
     for (a = 0; a < n; ++a) {
-      const w = parseInt(e.substr(a * 2, 2), 16);
-      if (ee(w)) return a;
-      r[t + a] = w;
+      const w = parseInt(t.substr(a * 2, 2), 16);
+      if (et(w)) return a;
+      r[e + a] = w;
     }
     return a;
   }
-  function _e(r, e, t, n) {
-    return W(v(e, r.length - t), r, t, n);
+  function Ft(r, t, e, n) {
+    return V(tt(t, r.length - e), r, e, n);
   }
-  function Fe(r, e, t, n) {
-    return W(Me(e), r, t, n);
+  function _t(r, t, e, n) {
+    return V(Ot(t), r, e, n);
   }
-  function Ae(r, e, t, n) {
-    return W(Be(e), r, t, n);
+  function Ut(r, t, e, n) {
+    return V(gt(t), r, e, n);
   }
-  function Ue(r, e, t, n) {
-    return W(Oe(e, r.length - t), r, t, n);
+  function St(r, t, e, n) {
+    return V(Pt(t, r.length - e), r, e, n);
   }
-  o.prototype.write = function(e, t, n, f) {
-    if (t === void 0)
-      f = "utf8", n = this.length, t = 0;
-    else if (n === void 0 && typeof t == "string")
-      f = t, n = this.length, t = 0;
-    else if (isFinite(t))
-      t = t >>> 0, isFinite(n) ? (n = n >>> 0, f === void 0 && (f = "utf8")) : (f = n, n = void 0);
+  o.prototype.write = function(t, e, n, f) {
+    if (e === void 0)
+      f = "utf8", n = this.length, e = 0;
+    else if (n === void 0 && typeof e == "string")
+      f = e, n = this.length, e = 0;
+    else if (isFinite(e))
+      e = e >>> 0, isFinite(n) ? (n = n >>> 0, f === void 0 && (f = "utf8")) : (f = n, n = void 0);
     else
       throw new Error(
         "Buffer.write(string, encoding, offset[, length]) is no longer supported"
       );
-    const h = this.length - t;
-    if ((n === void 0 || n > h) && (n = h), e.length > 0 && (n < 0 || t < 0) || t > this.length)
+    const h = this.length - e;
+    if ((n === void 0 || n > h) && (n = h), t.length > 0 && (n < 0 || e < 0) || e > this.length)
       throw new RangeError("Attempt to write outside buffer bounds");
     f || (f = "utf8");
     let a = !1;
     for (; ; )
       switch (f) {
         case "hex":
-          return Ee(this, e, t, n);
+          return At(this, t, e, n);
         case "utf8":
         case "utf-8":
-          return _e(this, e, t, n);
+          return Ft(this, t, e, n);
         case "ascii":
         case "latin1":
         case "binary":
-          return Fe(this, e, t, n);
+          return _t(this, t, e, n);
         case "base64":
-          return Ae(this, e, t, n);
+          return Ut(this, t, e, n);
         case "ucs2":
         case "ucs-2":
         case "utf16le":
         case "utf-16le":
-          return Ue(this, e, t, n);
+          return St(this, t, e, n);
         default:
           if (a) throw new TypeError("Unknown encoding: " + f);
           f = ("" + f).toLowerCase(), a = !0;
@@ -785,18 +813,18 @@ ne.write = function(p, i, s, u, c, l) {
       data: Array.prototype.slice.call(this._arr || this, 0)
     };
   };
-  function Se(r, e, t) {
-    return e === 0 && t === r.length ? i.fromByteArray(r) : i.fromByteArray(r.slice(e, t));
+  function Ct(r, t, e) {
+    return t === 0 && e === r.length ? i.fromByteArray(r) : i.fromByteArray(r.slice(t, e));
   }
-  function ue(r, e, t) {
-    t = Math.min(r.length, t);
+  function ht(r, t, e) {
+    e = Math.min(r.length, e);
     const n = [];
-    let f = e;
-    for (; f < t; ) {
+    let f = t;
+    for (; f < e; ) {
       const h = r[f];
       let a = null, w = h > 239 ? 4 : h > 223 ? 3 : h > 191 ? 2 : 1;
-      if (f + w <= t) {
-        let E, I, _, m;
+      if (f + w <= e) {
+        let E, I, A, m;
         switch (w) {
           case 1:
             h < 128 && (a = h);
@@ -808,300 +836,300 @@ ne.write = function(p, i, s, u, c, l) {
             E = r[f + 1], I = r[f + 2], (E & 192) === 128 && (I & 192) === 128 && (m = (h & 15) << 12 | (E & 63) << 6 | I & 63, m > 2047 && (m < 55296 || m > 57343) && (a = m));
             break;
           case 4:
-            E = r[f + 1], I = r[f + 2], _ = r[f + 3], (E & 192) === 128 && (I & 192) === 128 && (_ & 192) === 128 && (m = (h & 15) << 18 | (E & 63) << 12 | (I & 63) << 6 | _ & 63, m > 65535 && m < 1114112 && (a = m));
+            E = r[f + 1], I = r[f + 2], A = r[f + 3], (E & 192) === 128 && (I & 192) === 128 && (A & 192) === 128 && (m = (h & 15) << 18 | (E & 63) << 12 | (I & 63) << 6 | A & 63, m > 65535 && m < 1114112 && (a = m));
         }
       }
       a === null ? (a = 65533, w = 1) : a > 65535 && (a -= 65536, n.push(a >>> 10 & 1023 | 55296), a = 56320 | a & 1023), n.push(a), f += w;
     }
-    return Ce(n);
+    return Rt(n);
   }
-  const he = 4096;
-  function Ce(r) {
-    const e = r.length;
-    if (e <= he)
+  const at = 4096;
+  function Rt(r) {
+    const t = r.length;
+    if (t <= at)
       return String.fromCharCode.apply(String, r);
-    let t = "", n = 0;
-    for (; n < e; )
-      t += String.fromCharCode.apply(
+    let e = "", n = 0;
+    for (; n < t; )
+      e += String.fromCharCode.apply(
         String,
-        r.slice(n, n += he)
+        r.slice(n, n += at)
       );
-    return t;
+    return e;
   }
-  function Re(r, e, t) {
+  function kt(r, t, e) {
     let n = "";
-    t = Math.min(r.length, t);
-    for (let f = e; f < t; ++f)
+    e = Math.min(r.length, e);
+    for (let f = t; f < e; ++f)
       n += String.fromCharCode(r[f] & 127);
     return n;
   }
-  function ke(r, e, t) {
+  function Lt(r, t, e) {
     let n = "";
-    t = Math.min(r.length, t);
-    for (let f = e; f < t; ++f)
+    e = Math.min(r.length, e);
+    for (let f = t; f < e; ++f)
       n += String.fromCharCode(r[f]);
     return n;
   }
-  function Le(r, e, t) {
+  function Tt(r, t, e) {
     const n = r.length;
-    (!e || e < 0) && (e = 0), (!t || t < 0 || t > n) && (t = n);
+    (!t || t < 0) && (t = 0), (!e || e < 0 || e > n) && (e = n);
     let f = "";
-    for (let h = e; h < t; ++h)
-      f += Pe[r[h]];
+    for (let h = t; h < e; ++h)
+      f += Dt[r[h]];
     return f;
   }
-  function Te(r, e, t) {
-    const n = r.slice(e, t);
+  function $t(r, t, e) {
+    const n = r.slice(t, e);
     let f = "";
     for (let h = 0; h < n.length - 1; h += 2)
       f += String.fromCharCode(n[h] + n[h + 1] * 256);
     return f;
   }
-  o.prototype.slice = function(e, t) {
+  o.prototype.slice = function(t, e) {
     const n = this.length;
-    e = ~~e, t = t === void 0 ? n : ~~t, e < 0 ? (e += n, e < 0 && (e = 0)) : e > n && (e = n), t < 0 ? (t += n, t < 0 && (t = 0)) : t > n && (t = n), t < e && (t = e);
-    const f = this.subarray(e, t);
+    t = ~~t, e = e === void 0 ? n : ~~e, t < 0 ? (t += n, t < 0 && (t = 0)) : t > n && (t = n), e < 0 ? (e += n, e < 0 && (e = 0)) : e > n && (e = n), e < t && (e = t);
+    const f = this.subarray(t, e);
     return Object.setPrototypeOf(f, o.prototype), f;
   };
-  function U(r, e, t) {
+  function U(r, t, e) {
     if (r % 1 !== 0 || r < 0) throw new RangeError("offset is not uint");
-    if (r + e > t) throw new RangeError("Trying to access beyond buffer length");
+    if (r + t > e) throw new RangeError("Trying to access beyond buffer length");
   }
-  o.prototype.readUintLE = o.prototype.readUIntLE = function(e, t, n) {
-    e = e >>> 0, t = t >>> 0, n || U(e, t, this.length);
-    let f = this[e], h = 1, a = 0;
-    for (; ++a < t && (h *= 256); )
-      f += this[e + a] * h;
+  o.prototype.readUintLE = o.prototype.readUIntLE = function(t, e, n) {
+    t = t >>> 0, e = e >>> 0, n || U(t, e, this.length);
+    let f = this[t], h = 1, a = 0;
+    for (; ++a < e && (h *= 256); )
+      f += this[t + a] * h;
     return f;
-  }, o.prototype.readUintBE = o.prototype.readUIntBE = function(e, t, n) {
-    e = e >>> 0, t = t >>> 0, n || U(e, t, this.length);
-    let f = this[e + --t], h = 1;
-    for (; t > 0 && (h *= 256); )
-      f += this[e + --t] * h;
+  }, o.prototype.readUintBE = o.prototype.readUIntBE = function(t, e, n) {
+    t = t >>> 0, e = e >>> 0, n || U(t, e, this.length);
+    let f = this[t + --e], h = 1;
+    for (; e > 0 && (h *= 256); )
+      f += this[t + --e] * h;
     return f;
-  }, o.prototype.readUint8 = o.prototype.readUInt8 = function(e, t) {
-    return e = e >>> 0, t || U(e, 1, this.length), this[e];
-  }, o.prototype.readUint16LE = o.prototype.readUInt16LE = function(e, t) {
-    return e = e >>> 0, t || U(e, 2, this.length), this[e] | this[e + 1] << 8;
-  }, o.prototype.readUint16BE = o.prototype.readUInt16BE = function(e, t) {
-    return e = e >>> 0, t || U(e, 2, this.length), this[e] << 8 | this[e + 1];
-  }, o.prototype.readUint32LE = o.prototype.readUInt32LE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), (this[e] | this[e + 1] << 8 | this[e + 2] << 16) + this[e + 3] * 16777216;
-  }, o.prototype.readUint32BE = o.prototype.readUInt32BE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), this[e] * 16777216 + (this[e + 1] << 16 | this[e + 2] << 8 | this[e + 3]);
-  }, o.prototype.readBigUInt64LE = $(function(e) {
-    e = e >>> 0, O(e, "offset");
-    const t = this[e], n = this[e + 7];
-    (t === void 0 || n === void 0) && z(e, this.length - 8);
-    const f = t + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + this[++e] * 2 ** 24, h = this[++e] + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + n * 2 ** 24;
+  }, o.prototype.readUint8 = o.prototype.readUInt8 = function(t, e) {
+    return t = t >>> 0, e || U(t, 1, this.length), this[t];
+  }, o.prototype.readUint16LE = o.prototype.readUInt16LE = function(t, e) {
+    return t = t >>> 0, e || U(t, 2, this.length), this[t] | this[t + 1] << 8;
+  }, o.prototype.readUint16BE = o.prototype.readUInt16BE = function(t, e) {
+    return t = t >>> 0, e || U(t, 2, this.length), this[t] << 8 | this[t + 1];
+  }, o.prototype.readUint32LE = o.prototype.readUInt32LE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), (this[t] | this[t + 1] << 8 | this[t + 2] << 16) + this[t + 3] * 16777216;
+  }, o.prototype.readUint32BE = o.prototype.readUInt32BE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), this[t] * 16777216 + (this[t + 1] << 16 | this[t + 2] << 8 | this[t + 3]);
+  }, o.prototype.readBigUInt64LE = $(function(t) {
+    t = t >>> 0, O(t, "offset");
+    const e = this[t], n = this[t + 7];
+    (e === void 0 || n === void 0) && z(t, this.length - 8);
+    const f = e + this[++t] * 2 ** 8 + this[++t] * 2 ** 16 + this[++t] * 2 ** 24, h = this[++t] + this[++t] * 2 ** 8 + this[++t] * 2 ** 16 + n * 2 ** 24;
     return BigInt(f) + (BigInt(h) << BigInt(32));
-  }), o.prototype.readBigUInt64BE = $(function(e) {
-    e = e >>> 0, O(e, "offset");
-    const t = this[e], n = this[e + 7];
-    (t === void 0 || n === void 0) && z(e, this.length - 8);
-    const f = t * 2 ** 24 + this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + this[++e], h = this[++e] * 2 ** 24 + this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + n;
+  }), o.prototype.readBigUInt64BE = $(function(t) {
+    t = t >>> 0, O(t, "offset");
+    const e = this[t], n = this[t + 7];
+    (e === void 0 || n === void 0) && z(t, this.length - 8);
+    const f = e * 2 ** 24 + this[++t] * 2 ** 16 + this[++t] * 2 ** 8 + this[++t], h = this[++t] * 2 ** 24 + this[++t] * 2 ** 16 + this[++t] * 2 ** 8 + n;
     return (BigInt(f) << BigInt(32)) + BigInt(h);
-  }), o.prototype.readIntLE = function(e, t, n) {
-    e = e >>> 0, t = t >>> 0, n || U(e, t, this.length);
-    let f = this[e], h = 1, a = 0;
-    for (; ++a < t && (h *= 256); )
-      f += this[e + a] * h;
-    return h *= 128, f >= h && (f -= Math.pow(2, 8 * t)), f;
-  }, o.prototype.readIntBE = function(e, t, n) {
-    e = e >>> 0, t = t >>> 0, n || U(e, t, this.length);
-    let f = t, h = 1, a = this[e + --f];
+  }), o.prototype.readIntLE = function(t, e, n) {
+    t = t >>> 0, e = e >>> 0, n || U(t, e, this.length);
+    let f = this[t], h = 1, a = 0;
+    for (; ++a < e && (h *= 256); )
+      f += this[t + a] * h;
+    return h *= 128, f >= h && (f -= Math.pow(2, 8 * e)), f;
+  }, o.prototype.readIntBE = function(t, e, n) {
+    t = t >>> 0, e = e >>> 0, n || U(t, e, this.length);
+    let f = e, h = 1, a = this[t + --f];
     for (; f > 0 && (h *= 256); )
-      a += this[e + --f] * h;
-    return h *= 128, a >= h && (a -= Math.pow(2, 8 * t)), a;
-  }, o.prototype.readInt8 = function(e, t) {
-    return e = e >>> 0, t || U(e, 1, this.length), this[e] & 128 ? (255 - this[e] + 1) * -1 : this[e];
-  }, o.prototype.readInt16LE = function(e, t) {
-    e = e >>> 0, t || U(e, 2, this.length);
-    const n = this[e] | this[e + 1] << 8;
+      a += this[t + --f] * h;
+    return h *= 128, a >= h && (a -= Math.pow(2, 8 * e)), a;
+  }, o.prototype.readInt8 = function(t, e) {
+    return t = t >>> 0, e || U(t, 1, this.length), this[t] & 128 ? (255 - this[t] + 1) * -1 : this[t];
+  }, o.prototype.readInt16LE = function(t, e) {
+    t = t >>> 0, e || U(t, 2, this.length);
+    const n = this[t] | this[t + 1] << 8;
     return n & 32768 ? n | 4294901760 : n;
-  }, o.prototype.readInt16BE = function(e, t) {
-    e = e >>> 0, t || U(e, 2, this.length);
-    const n = this[e + 1] | this[e] << 8;
+  }, o.prototype.readInt16BE = function(t, e) {
+    t = t >>> 0, e || U(t, 2, this.length);
+    const n = this[t + 1] | this[t] << 8;
     return n & 32768 ? n | 4294901760 : n;
-  }, o.prototype.readInt32LE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), this[e] | this[e + 1] << 8 | this[e + 2] << 16 | this[e + 3] << 24;
-  }, o.prototype.readInt32BE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), this[e] << 24 | this[e + 1] << 16 | this[e + 2] << 8 | this[e + 3];
-  }, o.prototype.readBigInt64LE = $(function(e) {
-    e = e >>> 0, O(e, "offset");
-    const t = this[e], n = this[e + 7];
-    (t === void 0 || n === void 0) && z(e, this.length - 8);
-    const f = this[e + 4] + this[e + 5] * 2 ** 8 + this[e + 6] * 2 ** 16 + (n << 24);
-    return (BigInt(f) << BigInt(32)) + BigInt(t + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + this[++e] * 2 ** 24);
-  }), o.prototype.readBigInt64BE = $(function(e) {
-    e = e >>> 0, O(e, "offset");
-    const t = this[e], n = this[e + 7];
-    (t === void 0 || n === void 0) && z(e, this.length - 8);
-    const f = (t << 24) + // Overflow
-    this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + this[++e];
-    return (BigInt(f) << BigInt(32)) + BigInt(this[++e] * 2 ** 24 + this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + n);
-  }), o.prototype.readFloatLE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), s.read(this, e, !0, 23, 4);
-  }, o.prototype.readFloatBE = function(e, t) {
-    return e = e >>> 0, t || U(e, 4, this.length), s.read(this, e, !1, 23, 4);
-  }, o.prototype.readDoubleLE = function(e, t) {
-    return e = e >>> 0, t || U(e, 8, this.length), s.read(this, e, !0, 52, 8);
-  }, o.prototype.readDoubleBE = function(e, t) {
-    return e = e >>> 0, t || U(e, 8, this.length), s.read(this, e, !1, 52, 8);
+  }, o.prototype.readInt32LE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), this[t] | this[t + 1] << 8 | this[t + 2] << 16 | this[t + 3] << 24;
+  }, o.prototype.readInt32BE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), this[t] << 24 | this[t + 1] << 16 | this[t + 2] << 8 | this[t + 3];
+  }, o.prototype.readBigInt64LE = $(function(t) {
+    t = t >>> 0, O(t, "offset");
+    const e = this[t], n = this[t + 7];
+    (e === void 0 || n === void 0) && z(t, this.length - 8);
+    const f = this[t + 4] + this[t + 5] * 2 ** 8 + this[t + 6] * 2 ** 16 + (n << 24);
+    return (BigInt(f) << BigInt(32)) + BigInt(e + this[++t] * 2 ** 8 + this[++t] * 2 ** 16 + this[++t] * 2 ** 24);
+  }), o.prototype.readBigInt64BE = $(function(t) {
+    t = t >>> 0, O(t, "offset");
+    const e = this[t], n = this[t + 7];
+    (e === void 0 || n === void 0) && z(t, this.length - 8);
+    const f = (e << 24) + // Overflow
+    this[++t] * 2 ** 16 + this[++t] * 2 ** 8 + this[++t];
+    return (BigInt(f) << BigInt(32)) + BigInt(this[++t] * 2 ** 24 + this[++t] * 2 ** 16 + this[++t] * 2 ** 8 + n);
+  }), o.prototype.readFloatLE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), s.read(this, t, !0, 23, 4);
+  }, o.prototype.readFloatBE = function(t, e) {
+    return t = t >>> 0, e || U(t, 4, this.length), s.read(this, t, !1, 23, 4);
+  }, o.prototype.readDoubleLE = function(t, e) {
+    return t = t >>> 0, e || U(t, 8, this.length), s.read(this, t, !0, 52, 8);
+  }, o.prototype.readDoubleBE = function(t, e) {
+    return t = t >>> 0, e || U(t, 8, this.length), s.read(this, t, !1, 52, 8);
   };
-  function C(r, e, t, n, f, h) {
+  function C(r, t, e, n, f, h) {
     if (!o.isBuffer(r)) throw new TypeError('"buffer" argument must be a Buffer instance');
-    if (e > f || e < h) throw new RangeError('"value" argument is out of bounds');
-    if (t + n > r.length) throw new RangeError("Index out of range");
+    if (t > f || t < h) throw new RangeError('"value" argument is out of bounds');
+    if (e + n > r.length) throw new RangeError("Index out of range");
   }
-  o.prototype.writeUintLE = o.prototype.writeUIntLE = function(e, t, n, f) {
-    if (e = +e, t = t >>> 0, n = n >>> 0, !f) {
+  o.prototype.writeUintLE = o.prototype.writeUIntLE = function(t, e, n, f) {
+    if (t = +t, e = e >>> 0, n = n >>> 0, !f) {
       const w = Math.pow(2, 8 * n) - 1;
-      C(this, e, t, n, w, 0);
+      C(this, t, e, n, w, 0);
     }
     let h = 1, a = 0;
-    for (this[t] = e & 255; ++a < n && (h *= 256); )
-      this[t + a] = e / h & 255;
-    return t + n;
-  }, o.prototype.writeUintBE = o.prototype.writeUIntBE = function(e, t, n, f) {
-    if (e = +e, t = t >>> 0, n = n >>> 0, !f) {
+    for (this[e] = t & 255; ++a < n && (h *= 256); )
+      this[e + a] = t / h & 255;
+    return e + n;
+  }, o.prototype.writeUintBE = o.prototype.writeUIntBE = function(t, e, n, f) {
+    if (t = +t, e = e >>> 0, n = n >>> 0, !f) {
       const w = Math.pow(2, 8 * n) - 1;
-      C(this, e, t, n, w, 0);
+      C(this, t, e, n, w, 0);
     }
     let h = n - 1, a = 1;
-    for (this[t + h] = e & 255; --h >= 0 && (a *= 256); )
-      this[t + h] = e / a & 255;
-    return t + n;
-  }, o.prototype.writeUint8 = o.prototype.writeUInt8 = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 1, 255, 0), this[t] = e & 255, t + 1;
-  }, o.prototype.writeUint16LE = o.prototype.writeUInt16LE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 2, 65535, 0), this[t] = e & 255, this[t + 1] = e >>> 8, t + 2;
-  }, o.prototype.writeUint16BE = o.prototype.writeUInt16BE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 2, 65535, 0), this[t] = e >>> 8, this[t + 1] = e & 255, t + 2;
-  }, o.prototype.writeUint32LE = o.prototype.writeUInt32LE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 4, 4294967295, 0), this[t + 3] = e >>> 24, this[t + 2] = e >>> 16, this[t + 1] = e >>> 8, this[t] = e & 255, t + 4;
-  }, o.prototype.writeUint32BE = o.prototype.writeUInt32BE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 4, 4294967295, 0), this[t] = e >>> 24, this[t + 1] = e >>> 16, this[t + 2] = e >>> 8, this[t + 3] = e & 255, t + 4;
+    for (this[e + h] = t & 255; --h >= 0 && (a *= 256); )
+      this[e + h] = t / a & 255;
+    return e + n;
+  }, o.prototype.writeUint8 = o.prototype.writeUInt8 = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 1, 255, 0), this[e] = t & 255, e + 1;
+  }, o.prototype.writeUint16LE = o.prototype.writeUInt16LE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 2, 65535, 0), this[e] = t & 255, this[e + 1] = t >>> 8, e + 2;
+  }, o.prototype.writeUint16BE = o.prototype.writeUInt16BE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 2, 65535, 0), this[e] = t >>> 8, this[e + 1] = t & 255, e + 2;
+  }, o.prototype.writeUint32LE = o.prototype.writeUInt32LE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 4, 4294967295, 0), this[e + 3] = t >>> 24, this[e + 2] = t >>> 16, this[e + 1] = t >>> 8, this[e] = t & 255, e + 4;
+  }, o.prototype.writeUint32BE = o.prototype.writeUInt32BE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 4, 4294967295, 0), this[e] = t >>> 24, this[e + 1] = t >>> 16, this[e + 2] = t >>> 8, this[e + 3] = t & 255, e + 4;
   };
-  function ae(r, e, t, n, f) {
-    we(e, n, f, r, t, 7);
-    let h = Number(e & BigInt(4294967295));
-    r[t++] = h, h = h >> 8, r[t++] = h, h = h >> 8, r[t++] = h, h = h >> 8, r[t++] = h;
-    let a = Number(e >> BigInt(32) & BigInt(4294967295));
-    return r[t++] = a, a = a >> 8, r[t++] = a, a = a >> 8, r[t++] = a, a = a >> 8, r[t++] = a, t;
+  function ct(r, t, e, n, f) {
+    Bt(t, n, f, r, e, 7);
+    let h = Number(t & BigInt(4294967295));
+    r[e++] = h, h = h >> 8, r[e++] = h, h = h >> 8, r[e++] = h, h = h >> 8, r[e++] = h;
+    let a = Number(t >> BigInt(32) & BigInt(4294967295));
+    return r[e++] = a, a = a >> 8, r[e++] = a, a = a >> 8, r[e++] = a, a = a >> 8, r[e++] = a, e;
   }
-  function ce(r, e, t, n, f) {
-    we(e, n, f, r, t, 7);
-    let h = Number(e & BigInt(4294967295));
-    r[t + 7] = h, h = h >> 8, r[t + 6] = h, h = h >> 8, r[t + 5] = h, h = h >> 8, r[t + 4] = h;
-    let a = Number(e >> BigInt(32) & BigInt(4294967295));
-    return r[t + 3] = a, a = a >> 8, r[t + 2] = a, a = a >> 8, r[t + 1] = a, a = a >> 8, r[t] = a, t + 8;
+  function lt(r, t, e, n, f) {
+    Bt(t, n, f, r, e, 7);
+    let h = Number(t & BigInt(4294967295));
+    r[e + 7] = h, h = h >> 8, r[e + 6] = h, h = h >> 8, r[e + 5] = h, h = h >> 8, r[e + 4] = h;
+    let a = Number(t >> BigInt(32) & BigInt(4294967295));
+    return r[e + 3] = a, a = a >> 8, r[e + 2] = a, a = a >> 8, r[e + 1] = a, a = a >> 8, r[e] = a, e + 8;
   }
-  o.prototype.writeBigUInt64LE = $(function(e, t = 0) {
-    return ae(this, e, t, BigInt(0), BigInt("0xffffffffffffffff"));
-  }), o.prototype.writeBigUInt64BE = $(function(e, t = 0) {
-    return ce(this, e, t, BigInt(0), BigInt("0xffffffffffffffff"));
-  }), o.prototype.writeIntLE = function(e, t, n, f) {
-    if (e = +e, t = t >>> 0, !f) {
+  o.prototype.writeBigUInt64LE = $(function(t, e = 0) {
+    return ct(this, t, e, BigInt(0), BigInt("0xffffffffffffffff"));
+  }), o.prototype.writeBigUInt64BE = $(function(t, e = 0) {
+    return lt(this, t, e, BigInt(0), BigInt("0xffffffffffffffff"));
+  }), o.prototype.writeIntLE = function(t, e, n, f) {
+    if (t = +t, e = e >>> 0, !f) {
       const E = Math.pow(2, 8 * n - 1);
-      C(this, e, t, n, E - 1, -E);
+      C(this, t, e, n, E - 1, -E);
     }
     let h = 0, a = 1, w = 0;
-    for (this[t] = e & 255; ++h < n && (a *= 256); )
-      e < 0 && w === 0 && this[t + h - 1] !== 0 && (w = 1), this[t + h] = (e / a >> 0) - w & 255;
-    return t + n;
-  }, o.prototype.writeIntBE = function(e, t, n, f) {
-    if (e = +e, t = t >>> 0, !f) {
+    for (this[e] = t & 255; ++h < n && (a *= 256); )
+      t < 0 && w === 0 && this[e + h - 1] !== 0 && (w = 1), this[e + h] = (t / a >> 0) - w & 255;
+    return e + n;
+  }, o.prototype.writeIntBE = function(t, e, n, f) {
+    if (t = +t, e = e >>> 0, !f) {
       const E = Math.pow(2, 8 * n - 1);
-      C(this, e, t, n, E - 1, -E);
+      C(this, t, e, n, E - 1, -E);
     }
     let h = n - 1, a = 1, w = 0;
-    for (this[t + h] = e & 255; --h >= 0 && (a *= 256); )
-      e < 0 && w === 0 && this[t + h + 1] !== 0 && (w = 1), this[t + h] = (e / a >> 0) - w & 255;
-    return t + n;
-  }, o.prototype.writeInt8 = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 1, 127, -128), e < 0 && (e = 255 + e + 1), this[t] = e & 255, t + 1;
-  }, o.prototype.writeInt16LE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 2, 32767, -32768), this[t] = e & 255, this[t + 1] = e >>> 8, t + 2;
-  }, o.prototype.writeInt16BE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 2, 32767, -32768), this[t] = e >>> 8, this[t + 1] = e & 255, t + 2;
-  }, o.prototype.writeInt32LE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 4, 2147483647, -2147483648), this[t] = e & 255, this[t + 1] = e >>> 8, this[t + 2] = e >>> 16, this[t + 3] = e >>> 24, t + 4;
-  }, o.prototype.writeInt32BE = function(e, t, n) {
-    return e = +e, t = t >>> 0, n || C(this, e, t, 4, 2147483647, -2147483648), e < 0 && (e = 4294967295 + e + 1), this[t] = e >>> 24, this[t + 1] = e >>> 16, this[t + 2] = e >>> 8, this[t + 3] = e & 255, t + 4;
-  }, o.prototype.writeBigInt64LE = $(function(e, t = 0) {
-    return ae(this, e, t, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
-  }), o.prototype.writeBigInt64BE = $(function(e, t = 0) {
-    return ce(this, e, t, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
+    for (this[e + h] = t & 255; --h >= 0 && (a *= 256); )
+      t < 0 && w === 0 && this[e + h + 1] !== 0 && (w = 1), this[e + h] = (t / a >> 0) - w & 255;
+    return e + n;
+  }, o.prototype.writeInt8 = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 1, 127, -128), t < 0 && (t = 255 + t + 1), this[e] = t & 255, e + 1;
+  }, o.prototype.writeInt16LE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 2, 32767, -32768), this[e] = t & 255, this[e + 1] = t >>> 8, e + 2;
+  }, o.prototype.writeInt16BE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 2, 32767, -32768), this[e] = t >>> 8, this[e + 1] = t & 255, e + 2;
+  }, o.prototype.writeInt32LE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 4, 2147483647, -2147483648), this[e] = t & 255, this[e + 1] = t >>> 8, this[e + 2] = t >>> 16, this[e + 3] = t >>> 24, e + 4;
+  }, o.prototype.writeInt32BE = function(t, e, n) {
+    return t = +t, e = e >>> 0, n || C(this, t, e, 4, 2147483647, -2147483648), t < 0 && (t = 4294967295 + t + 1), this[e] = t >>> 24, this[e + 1] = t >>> 16, this[e + 2] = t >>> 8, this[e + 3] = t & 255, e + 4;
+  }, o.prototype.writeBigInt64LE = $(function(t, e = 0) {
+    return ct(this, t, e, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
+  }), o.prototype.writeBigInt64BE = $(function(t, e = 0) {
+    return lt(this, t, e, -BigInt("0x8000000000000000"), BigInt("0x7fffffffffffffff"));
   });
-  function le(r, e, t, n, f, h) {
-    if (t + n > r.length) throw new RangeError("Index out of range");
-    if (t < 0) throw new RangeError("Index out of range");
+  function dt(r, t, e, n, f, h) {
+    if (e + n > r.length) throw new RangeError("Index out of range");
+    if (e < 0) throw new RangeError("Index out of range");
   }
-  function de(r, e, t, n, f) {
-    return e = +e, t = t >>> 0, f || le(r, e, t, 4), s.write(r, e, t, n, 23, 4), t + 4;
+  function pt(r, t, e, n, f) {
+    return t = +t, e = e >>> 0, f || dt(r, t, e, 4), s.write(r, t, e, n, 23, 4), e + 4;
   }
-  o.prototype.writeFloatLE = function(e, t, n) {
-    return de(this, e, t, !0, n);
-  }, o.prototype.writeFloatBE = function(e, t, n) {
-    return de(this, e, t, !1, n);
+  o.prototype.writeFloatLE = function(t, e, n) {
+    return pt(this, t, e, !0, n);
+  }, o.prototype.writeFloatBE = function(t, e, n) {
+    return pt(this, t, e, !1, n);
   };
-  function pe(r, e, t, n, f) {
-    return e = +e, t = t >>> 0, f || le(r, e, t, 8), s.write(r, e, t, n, 52, 8), t + 8;
+  function yt(r, t, e, n, f) {
+    return t = +t, e = e >>> 0, f || dt(r, t, e, 8), s.write(r, t, e, n, 52, 8), e + 8;
   }
-  o.prototype.writeDoubleLE = function(e, t, n) {
-    return pe(this, e, t, !0, n);
-  }, o.prototype.writeDoubleBE = function(e, t, n) {
-    return pe(this, e, t, !1, n);
-  }, o.prototype.copy = function(e, t, n, f) {
-    if (!o.isBuffer(e)) throw new TypeError("argument should be a Buffer");
-    if (n || (n = 0), !f && f !== 0 && (f = this.length), t >= e.length && (t = e.length), t || (t = 0), f > 0 && f < n && (f = n), f === n || e.length === 0 || this.length === 0) return 0;
-    if (t < 0)
+  o.prototype.writeDoubleLE = function(t, e, n) {
+    return yt(this, t, e, !0, n);
+  }, o.prototype.writeDoubleBE = function(t, e, n) {
+    return yt(this, t, e, !1, n);
+  }, o.prototype.copy = function(t, e, n, f) {
+    if (!o.isBuffer(t)) throw new TypeError("argument should be a Buffer");
+    if (n || (n = 0), !f && f !== 0 && (f = this.length), e >= t.length && (e = t.length), e || (e = 0), f > 0 && f < n && (f = n), f === n || t.length === 0 || this.length === 0) return 0;
+    if (e < 0)
       throw new RangeError("targetStart out of bounds");
     if (n < 0 || n >= this.length) throw new RangeError("Index out of range");
     if (f < 0) throw new RangeError("sourceEnd out of bounds");
-    f > this.length && (f = this.length), e.length - t < f - n && (f = e.length - t + n);
+    f > this.length && (f = this.length), t.length - e < f - n && (f = t.length - e + n);
     const h = f - n;
-    return this === e && typeof Uint8Array.prototype.copyWithin == "function" ? this.copyWithin(t, n, f) : Uint8Array.prototype.set.call(
-      e,
+    return this === t && typeof Uint8Array.prototype.copyWithin == "function" ? this.copyWithin(e, n, f) : Uint8Array.prototype.set.call(
+      t,
       this.subarray(n, f),
-      t
+      e
     ), h;
-  }, o.prototype.fill = function(e, t, n, f) {
-    if (typeof e == "string") {
-      if (typeof t == "string" ? (f = t, t = 0, n = this.length) : typeof n == "string" && (f = n, n = this.length), f !== void 0 && typeof f != "string")
+  }, o.prototype.fill = function(t, e, n, f) {
+    if (typeof t == "string") {
+      if (typeof e == "string" ? (f = e, e = 0, n = this.length) : typeof n == "string" && (f = n, n = this.length), f !== void 0 && typeof f != "string")
         throw new TypeError("encoding must be a string");
       if (typeof f == "string" && !o.isEncoding(f))
         throw new TypeError("Unknown encoding: " + f);
-      if (e.length === 1) {
-        const a = e.charCodeAt(0);
-        (f === "utf8" && a < 128 || f === "latin1") && (e = a);
+      if (t.length === 1) {
+        const a = t.charCodeAt(0);
+        (f === "utf8" && a < 128 || f === "latin1") && (t = a);
       }
-    } else typeof e == "number" ? e = e & 255 : typeof e == "boolean" && (e = Number(e));
-    if (t < 0 || this.length < t || this.length < n)
+    } else typeof t == "number" ? t = t & 255 : typeof t == "boolean" && (t = Number(t));
+    if (e < 0 || this.length < e || this.length < n)
       throw new RangeError("Out of range index");
-    if (n <= t)
+    if (n <= e)
       return this;
-    t = t >>> 0, n = n === void 0 ? this.length : n >>> 0, e || (e = 0);
+    e = e >>> 0, n = n === void 0 ? this.length : n >>> 0, t || (t = 0);
     let h;
-    if (typeof e == "number")
-      for (h = t; h < n; ++h)
-        this[h] = e;
+    if (typeof t == "number")
+      for (h = e; h < n; ++h)
+        this[h] = t;
     else {
-      const a = o.isBuffer(e) ? e : o.from(e, f), w = a.length;
+      const a = o.isBuffer(t) ? t : o.from(t, f), w = a.length;
       if (w === 0)
-        throw new TypeError('The value "' + e + '" is invalid for argument "value"');
-      for (h = 0; h < n - t; ++h)
-        this[h + t] = a[h % w];
+        throw new TypeError('The value "' + t + '" is invalid for argument "value"');
+      for (h = 0; h < n - e; ++h)
+        this[h + e] = a[h % w];
     }
     return this;
   };
   const M = {};
-  function Z(r, e, t) {
-    M[r] = class extends t {
+  function v(r, t, e) {
+    M[r] = class extends e {
       constructor() {
         super(), Object.defineProperty(this, "message", {
-          value: e.apply(this, arguments),
+          value: t.apply(this, arguments),
           writable: !0,
           configurable: !0
         }), this.name = `${this.name} [${r}]`, this.stack, delete this.name;
@@ -1122,161 +1150,161 @@ ne.write = function(p, i, s, u, c, l) {
       }
     };
   }
-  Z(
+  v(
     "ERR_BUFFER_OUT_OF_BOUNDS",
     function(r) {
       return r ? `${r} is outside of buffer bounds` : "Attempt to access memory outside buffer bounds";
     },
     RangeError
-  ), Z(
+  ), v(
     "ERR_INVALID_ARG_TYPE",
-    function(r, e) {
-      return `The "${r}" argument must be of type number. Received type ${typeof e}`;
+    function(r, t) {
+      return `The "${r}" argument must be of type number. Received type ${typeof t}`;
     },
     TypeError
-  ), Z(
+  ), v(
     "ERR_OUT_OF_RANGE",
-    function(r, e, t) {
-      let n = `The value of "${r}" is out of range.`, f = t;
-      return Number.isInteger(t) && Math.abs(t) > 2 ** 32 ? f = ye(String(t)) : typeof t == "bigint" && (f = String(t), (t > BigInt(2) ** BigInt(32) || t < -(BigInt(2) ** BigInt(32))) && (f = ye(f)), f += "n"), n += ` It must be ${e}. Received ${f}`, n;
+    function(r, t, e) {
+      let n = `The value of "${r}" is out of range.`, f = e;
+      return Number.isInteger(e) && Math.abs(e) > 2 ** 32 ? f = wt(String(e)) : typeof e == "bigint" && (f = String(e), (e > BigInt(2) ** BigInt(32) || e < -(BigInt(2) ** BigInt(32))) && (f = wt(f)), f += "n"), n += ` It must be ${t}. Received ${f}`, n;
     },
     RangeError
   );
-  function ye(r) {
-    let e = "", t = r.length;
+  function wt(r) {
+    let t = "", e = r.length;
     const n = r[0] === "-" ? 1 : 0;
-    for (; t >= n + 4; t -= 3)
-      e = `_${r.slice(t - 3, t)}${e}`;
-    return `${r.slice(0, t)}${e}`;
+    for (; e >= n + 4; e -= 3)
+      t = `_${r.slice(e - 3, e)}${t}`;
+    return `${r.slice(0, e)}${t}`;
   }
-  function $e(r, e, t) {
-    O(e, "offset"), (r[e] === void 0 || r[e + t] === void 0) && z(e, r.length - (t + 1));
+  function Nt(r, t, e) {
+    O(t, "offset"), (r[t] === void 0 || r[t + e] === void 0) && z(t, r.length - (e + 1));
   }
-  function we(r, e, t, n, f, h) {
-    if (r > t || r < e) {
-      const a = typeof e == "bigint" ? "n" : "";
+  function Bt(r, t, e, n, f, h) {
+    if (r > e || r < t) {
+      const a = typeof t == "bigint" ? "n" : "";
       let w;
-      throw e === 0 || e === BigInt(0) ? w = `>= 0${a} and < 2${a} ** ${(h + 1) * 8}${a}` : w = `>= -(2${a} ** ${(h + 1) * 8 - 1}${a}) and < 2 ** ${(h + 1) * 8 - 1}${a}`, new M.ERR_OUT_OF_RANGE("value", w, r);
+      throw t === 0 || t === BigInt(0) ? w = `>= 0${a} and < 2${a} ** ${(h + 1) * 8}${a}` : w = `>= -(2${a} ** ${(h + 1) * 8 - 1}${a}) and < 2 ** ${(h + 1) * 8 - 1}${a}`, new M.ERR_OUT_OF_RANGE("value", w, r);
     }
-    $e(n, f, h);
+    Nt(n, f, h);
   }
-  function O(r, e) {
+  function O(r, t) {
     if (typeof r != "number")
-      throw new M.ERR_INVALID_ARG_TYPE(e, "number", r);
+      throw new M.ERR_INVALID_ARG_TYPE(t, "number", r);
   }
-  function z(r, e, t) {
-    throw Math.floor(r) !== r ? (O(r, t), new M.ERR_OUT_OF_RANGE("offset", "an integer", r)) : e < 0 ? new M.ERR_BUFFER_OUT_OF_BOUNDS() : new M.ERR_OUT_OF_RANGE(
+  function z(r, t, e) {
+    throw Math.floor(r) !== r ? (O(r, e), new M.ERR_OUT_OF_RANGE("offset", "an integer", r)) : t < 0 ? new M.ERR_BUFFER_OUT_OF_BOUNDS() : new M.ERR_OUT_OF_RANGE(
       "offset",
-      `>= 0 and <= ${e}`,
+      `>= 0 and <= ${t}`,
       r
     );
   }
-  const Ne = /[^+/0-9A-Za-z-_]/g;
-  function qe(r) {
-    if (r = r.split("=")[0], r = r.trim().replace(Ne, ""), r.length < 2) return "";
+  const qt = /[^+/0-9A-Za-z-_]/g;
+  function Mt(r) {
+    if (r = r.split("=")[0], r = r.trim().replace(qt, ""), r.length < 2) return "";
     for (; r.length % 4 !== 0; )
       r = r + "=";
     return r;
   }
-  function v(r, e) {
-    e = e || 1 / 0;
-    let t;
+  function tt(r, t) {
+    t = t || 1 / 0;
+    let e;
     const n = r.length;
     let f = null;
     const h = [];
     for (let a = 0; a < n; ++a) {
-      if (t = r.charCodeAt(a), t > 55295 && t < 57344) {
+      if (e = r.charCodeAt(a), e > 55295 && e < 57344) {
         if (!f) {
-          if (t > 56319) {
-            (e -= 3) > -1 && h.push(239, 191, 189);
+          if (e > 56319) {
+            (t -= 3) > -1 && h.push(239, 191, 189);
             continue;
           } else if (a + 1 === n) {
-            (e -= 3) > -1 && h.push(239, 191, 189);
+            (t -= 3) > -1 && h.push(239, 191, 189);
             continue;
           }
-          f = t;
+          f = e;
           continue;
         }
-        if (t < 56320) {
-          (e -= 3) > -1 && h.push(239, 191, 189), f = t;
+        if (e < 56320) {
+          (t -= 3) > -1 && h.push(239, 191, 189), f = e;
           continue;
         }
-        t = (f - 55296 << 10 | t - 56320) + 65536;
-      } else f && (e -= 3) > -1 && h.push(239, 191, 189);
-      if (f = null, t < 128) {
-        if ((e -= 1) < 0) break;
-        h.push(t);
-      } else if (t < 2048) {
-        if ((e -= 2) < 0) break;
+        e = (f - 55296 << 10 | e - 56320) + 65536;
+      } else f && (t -= 3) > -1 && h.push(239, 191, 189);
+      if (f = null, e < 128) {
+        if ((t -= 1) < 0) break;
+        h.push(e);
+      } else if (e < 2048) {
+        if ((t -= 2) < 0) break;
         h.push(
-          t >> 6 | 192,
-          t & 63 | 128
+          e >> 6 | 192,
+          e & 63 | 128
         );
-      } else if (t < 65536) {
-        if ((e -= 3) < 0) break;
+      } else if (e < 65536) {
+        if ((t -= 3) < 0) break;
         h.push(
-          t >> 12 | 224,
-          t >> 6 & 63 | 128,
-          t & 63 | 128
+          e >> 12 | 224,
+          e >> 6 & 63 | 128,
+          e & 63 | 128
         );
-      } else if (t < 1114112) {
-        if ((e -= 4) < 0) break;
+      } else if (e < 1114112) {
+        if ((t -= 4) < 0) break;
         h.push(
-          t >> 18 | 240,
-          t >> 12 & 63 | 128,
-          t >> 6 & 63 | 128,
-          t & 63 | 128
+          e >> 18 | 240,
+          e >> 12 & 63 | 128,
+          e >> 6 & 63 | 128,
+          e & 63 | 128
         );
       } else
         throw new Error("Invalid code point");
     }
     return h;
   }
-  function Me(r) {
-    const e = [];
-    for (let t = 0; t < r.length; ++t)
-      e.push(r.charCodeAt(t) & 255);
-    return e;
+  function Ot(r) {
+    const t = [];
+    for (let e = 0; e < r.length; ++e)
+      t.push(r.charCodeAt(e) & 255);
+    return t;
   }
-  function Oe(r, e) {
-    let t, n, f;
+  function Pt(r, t) {
+    let e, n, f;
     const h = [];
-    for (let a = 0; a < r.length && !((e -= 2) < 0); ++a)
-      t = r.charCodeAt(a), n = t >> 8, f = t % 256, h.push(f), h.push(n);
+    for (let a = 0; a < r.length && !((t -= 2) < 0); ++a)
+      e = r.charCodeAt(a), n = e >> 8, f = e % 256, h.push(f), h.push(n);
     return h;
   }
-  function Be(r) {
-    return i.toByteArray(qe(r));
+  function gt(r) {
+    return i.toByteArray(Mt(r));
   }
-  function W(r, e, t, n) {
+  function V(r, t, e, n) {
     let f;
-    for (f = 0; f < n && !(f + t >= e.length || f >= r.length); ++f)
-      e[f + t] = r[f];
+    for (f = 0; f < n && !(f + e >= t.length || f >= r.length); ++f)
+      t[f + e] = r[f];
     return f;
   }
-  function k(r, e) {
-    return r instanceof e || r != null && r.constructor != null && r.constructor.name != null && r.constructor.name === e.name;
+  function k(r, t) {
+    return r instanceof t || r != null && r.constructor != null && r.constructor.name != null && r.constructor.name === t.name;
   }
-  function ee(r) {
+  function et(r) {
     return r !== r;
   }
-  const Pe = function() {
-    const r = "0123456789abcdef", e = new Array(256);
-    for (let t = 0; t < 16; ++t) {
-      const n = t * 16;
+  const Dt = function() {
+    const r = "0123456789abcdef", t = new Array(256);
+    for (let e = 0; e < 16; ++e) {
+      const n = e * 16;
       for (let f = 0; f < 16; ++f)
-        e[n + f] = r[t] + r[f];
+        t[n + f] = r[e] + r[f];
     }
-    return e;
+    return t;
   }();
   function $(r) {
-    return typeof BigInt > "u" ? De : r;
+    return typeof BigInt > "u" ? zt : r;
   }
-  function De() {
+  function zt() {
     throw new Error("BigInt not supported");
   }
-})(K);
-class Ze {
+})(H);
+class vt {
   constructor() {
     B(this, "buffer", new Uint8Array(0));
   }
@@ -1285,7 +1313,7 @@ class Ze {
     s.set(this.buffer), s.set(i, this.buffer.length), this.buffer = s;
   }
 }
-class ve {
+class te {
   /**
    * Create a new writer
    * @param stream The writable stream to write to
@@ -1330,7 +1358,7 @@ class ve {
     this.pendingBits > 0 && (this.buffer[this.bufferedBytes++] = Number(this.pendingByte), this.pendingBits = 0, this.pendingByte = BigInt(0));
   }
   flush() {
-    this.bufferedBytes > 0 && (this.stream.write(K.Buffer.from(this.buffer.slice(0, this.bufferedBytes))), this.bufferedBytes = 0);
+    this.bufferedBytes > 0 && (this.stream.write(H.Buffer.from(this.buffer.slice(0, this.bufferedBytes))), this.bufferedBytes = 0);
   }
   min(i, s) {
     return i < s ? i : s;
@@ -1353,8 +1381,8 @@ class ve {
     }
   }
 }
-let V;
-class et {
+let X;
+class ee {
   constructor() {
     B(this, "buffers", []);
     B(this, "bufferedLength", 0);
@@ -1610,12 +1638,12 @@ class et {
     return s & u ? -((~(s - 1) & c) >>> 0) : s;
   }
   maskOf(i) {
-    if (!V) {
-      V = /* @__PURE__ */ new Map();
+    if (!X) {
+      X = /* @__PURE__ */ new Map();
       for (let s = 0; s <= 64; ++s)
-        V.set(s, Math.pow(2, s) - 1);
+        X.set(s, Math.pow(2, s) - 1);
     }
-    return V.get(i) ?? Math.pow(2, i) - 1;
+    return X.get(i) ?? Math.pow(2, i) - 1;
   }
   /**
    * Read an IEEE 754 floating point value with the given bit length (32 or 64). If there are not 
@@ -1667,8 +1695,8 @@ class et {
     l >= c.length && (c = this.buffers[++u], l = 0), i && this.consume(32);
     let x = (d & 128) !== 0;
     if (d &= -129, s === "lsb") {
-      let F = b, A = y, S = o, T = d;
-      d = F, o = A, y = S, b = T;
+      let F = b, _ = y, S = o, T = d;
+      d = F, o = _, y = S, b = T;
     }
     let g = d << 24 | o << 16 | y << 8 | b;
     return x && (g += 2 ** 31), g;
@@ -1721,8 +1749,8 @@ class et {
       let g = this.buffers[o], F = Math.floor(d / 8);
       if (F >= g.length)
         throw new Error(`Internal error: Current buffer (index ${o}) has length ${g.length} but our position within the buffer is ${F}! offset=${this.offset}, bufs=${this.buffers.length}`);
-      let A = d % 8, S, T = g[F];
-      S = Math.min(8 - A, l), x ? y = y << BigInt(S) | BigInt(g[F]) >> BigInt(8) - BigInt(S) - BigInt(A) & BigInt(this.maskOf(S)) : b = b << S | T >> 8 - S - A & this.maskOf(S), d += S, l -= S | 0, d >= g.length * 8 && (o += 1, d = 0);
+      let _ = d % 8, S, T = g[F];
+      S = Math.min(8 - _, l), x ? y = y << BigInt(S) | BigInt(g[F]) >> BigInt(8) - BigInt(S) - BigInt(_) & BigInt(this.maskOf(S)) : b = b << S | T >> 8 - S - _ & this.maskOf(S), d += S, l -= S | 0, d >= g.length * 8 && (o += 1, d = 0);
     }
     return s && this.consume(i), x ? Number(y) : b;
   }
@@ -1833,21 +1861,21 @@ class et {
     return new Error(`End of stream reached while reading ${i} bits, only ${this.available} bits are left in the stream`);
   }
 }
-function it(p) {
+function ne(p) {
   const s = p.split(`
 `).flatMap((d) => {
     const o = d.trim().match(/^(\d+) (\w+)$/);
     return o && parseInt(o[1], 10) > 0 ? [{ quantity: parseInt(o[1], 10), id: o[2] }] : [];
-  }), u = new Ze(), c = new ve(u, 1024);
-  return D.fromList(s).encode(c), c.end(), K.Buffer.concat([u.buffer]).toString("base64");
+  }), u = new vt(), c = new te(u, 1024);
+  return D.fromList(s).encode(c), c.end(), H.Buffer.concat([u.buffer]).toString("base64url");
 }
-function nt(p) {
-  const i = K.Buffer.from(p, "base64");
-  let s = new et();
+function se(p) {
+  const i = H.Buffer.from(p, "base64url");
+  let s = new ee();
   return s.addBuffer(i), D.decode(s).asCardRefQty.map((l) => `${l.quantity} ${l.id}`).join(`
 `);
 }
 export {
-  nt as decodeList,
-  it as encodeList
+  se as decodeList,
+  ne as encodeList
 };
