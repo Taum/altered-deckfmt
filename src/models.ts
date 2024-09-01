@@ -1,3 +1,10 @@
+export enum RefProduct {
+  Booster = "B", // special
+  // 0 = invalid
+  Promo = "P",   // 1
+  AltArt = "A",  // 2
+}
+
 export enum RefFaction {
   // 0 = invalid
   Axiom = "AX",  // 1
@@ -31,18 +38,18 @@ export interface CardRefQty {
 
 export class CardRefElements {
   set_code: RefSetCode
-  b_p: number
+  product: RefProduct
   faction: RefFaction
   num_in_faction: number
   rarity: RefRarity
   uniq_num?: number
 
   constructor(id: CardId) {
-    const match = id.match(/^ALT_(\w+)_(B|P)_(\w{2})_(\d{1,2})_(C|R1|R2|U)(?:_(\d+))?$/)
+    const match = id.match(/^ALT_(\w+)_(A|B|P)_(\w{2})_(\d{1,2})_(C|R1|R2|U)(?:_(\d+))?$/)
     if (!match) { throw "unrecognized card id" }
 
     this.set_code = (match[1] as RefSetCode)
-    this.b_p = match[2] == "B" ? 0 : 1
+    this.product = (match[2] as RefProduct)
     this.faction = (match[3] as RefFaction)
     this.num_in_faction = parseInt(match[4], 10)
     this.rarity = (match[5] as RefRarity)
@@ -50,6 +57,14 @@ export class CardRefElements {
 
     if (this.rarity == RefRarity.Unique && this.uniq_num == undefined) {
       throw "unique card is missing a unique_number"
+    }
+  }
+
+  get productId(): number | null {
+    switch (this.product) {
+      case RefProduct.Booster: return null;
+      case RefProduct.Promo: return 1;
+      case RefProduct.AltArt: return 2;
     }
   }
 

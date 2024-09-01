@@ -1,8 +1,9 @@
-import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements } from './models';
+import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements, RefProduct } from './models';
 import { BitstreamReader, BitstreamWriter } from './bitstream';
 
 export class EncodableCard {
   setCode: number
+  product: number | null
   faction: number
   numberInFaction: number
   rarity: number
@@ -13,7 +14,16 @@ export class EncodableCard {
     if (context.setCode === undefined) {
       throw new DecodingError("Tried to decode Card without SetCode in context")
     }
-    self.setCode = context.setCode 
+    self.setCode = context.setCode
+    const productBit = reader.readSync(1)
+    if (productBit == 1) {
+      self.product = null
+    } else {
+      self.product = reader.readSync(2)
+      if (self.product == 0 || self.product == 3) {
+        throw new DecodingError(`Invalid product ID (${self.product})`)
+      }
+    }
     self.faction = reader.readSync(3)
     if (self.faction == 0) {
       throw new DecodingError(`Invalid faction ID (${self.faction})`)
@@ -27,6 +37,12 @@ export class EncodableCard {
   }
 
   encode(writer: BitstreamWriter) {
+    if (this.product == null) {
+      writer.write(1, 1)
+    } else {
+      writer.write(1, 0)
+      writer.write(2, this.product)
+    }
     writer.write(3, this.faction)
     writer.write(5, this.numberInFaction)
     writer.write(2, this.rarity)
@@ -44,7 +60,13 @@ export class EncodableCard {
       case 1: id += RefSetCode.CoreKS; break;
       case 2: id += RefSetCode.Core; break;
     }
-    id += "_B_"
+    id += "_"
+    switch (this.product) {
+      case null: id += RefProduct.Booster; break;
+      case 1: id += RefProduct.Promo; break;
+      case 2: id += RefProduct.AltArt; break;
+    }
+    id += "_"
     switch (this.faction) {
       case 1: id += RefFaction.Axiom; break;
       case 2: id += RefFaction.Bravos; break;
@@ -74,6 +96,7 @@ export class EncodableCard {
     let ec = new EncodableCard()
     let refEls = new CardRefElements(id)
     ec.setCode = refEls.setId
+    ec.product = refEls.productId
     ec.faction = refEls.factionId
     ec.numberInFaction = refEls.num_in_faction
     ec.rarity = refEls.rarityId

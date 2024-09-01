@@ -11,19 +11,21 @@ const files = [
   "test/decklists/test_mana_orb.txt",
   "test/decklists/test_long_uniq.txt",
   "test/decklists/test_extd_qty.txt",
+  "test/decklists/test_products.txt",
   "test/decklists/list_1offs.txt",
   "test/decklists/list_2sets.txt",
   "test/decklists/list_uniques.txt",
   "test/decklists/list_yzmir.txt",
 ]
 const expectedEncoded = {
-  "test/decklists/test_mana_orb.txt": "EBAg3CN8LhA=",
-  "test/decklists/test_long_uniq.txt": "EBARFnwTSWfJw9Z8wOVn///A",
-  "test/decklists/test_extd_qty.txt": "EBAgTSZQ",
-  "test/decklists/list_1offs.txt": "ECAU0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QIuLhK1TpMGMRNlOCPRfpOROU=",
-  "test/decklists/list_2sets.txt": "ECAjFDNIdKNLNQNRZUdZFaJadcNeQESOrRSTjTw=", 
-  "test/decklists/list_uniques.txt": "EBAVmDGEeGGJWJOIKKaMOPIvqUaTOWFFw4cS/EShnFW6XamRm3mCvIA=",
-  "test/decklists/list_yzmir.txt": "EBAk3DNQrEPHVKmIvGLLHMPONZvTFcuZvVPWLYHaHZA=",
+  "test/decklists/test_mana_orb.txt": "EBAg3hHfC8IA",
+  "test/decklists/test_long_uniq.txt": "EBARGz4JpNnycPbPmBy2f//8",
+  "test/decklists/test_extd_qty.txt": "EBAgTTMo",
+  "test/decklists/test_products.txt": "EBAg04RrTJLU",
+  "test/decklists/list_1offs.txt": "ECAU2RjKFlBScpaUlWVLJFkwysZc0wLFzMh2NTYZw0+GfIEXS4ZWtOmYNMRmyzgp6N+mcjOU",
+  "test/decklists/list_2sets.txt": "ECAjGhnSHpR0s6gdRaqPWRrRVp64deQESnV0UqcdPA==", 
+  "test/decklists/list_uniques.txt": "EBAVnBjhHww4lcSeILFNjDx5S+so2TPLDRcOHGX4iUOcWt1XazI5t8wW8g==",
+  "test/decklists/list_yzmir.txt": "EBAk3hnUK4h8daVOIvjFyx5h846zfTGuXmb6p9YuwPaHsgA=",
 }
 
 function splitTrimSort(text: string): Array<string> {
