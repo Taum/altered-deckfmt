@@ -39,7 +39,7 @@ A format specification in available in [FORMAT_SPEC.md](FORMAT_SPEC.md).
 
 ## Usage
 
-see `src/test/encoding.test.ts` for an example of using these functions
+see `test/codec.test.ts` for an example of using these functions
 
 ```
 import { encodeList } from 'altered-deckfmt'
@@ -61,7 +61,17 @@ console.log(decklist) // "1 ALT_CORE_B_YZ_03_C\n3 ALT_CORE_B_BR_16_R2 ..."
 
 ### Import in a web page
 
-Use the `UMD` import provided in the `dist` folder.
+#### Using a bundler (Webpack, Next.js)
+
+Simply install the package your favorite package manager (NPM, Yarn...)
+
+```
+npm install altered-deckfmt
+```
+
+#### Using a <script> tag 
+
+If you do not use a bundler, you can copy the `UMD` file provided in the `dist` folder.
 See [dist-demo.html](dist-demo.html) for an example of how to use in your page.
 
 ## Developement
