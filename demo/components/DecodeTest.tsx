@@ -6,7 +6,7 @@ import { decodeList } from '../../src/index'
 export default function DecodeTest() {
 
   const [textList, setTextList] = useState("")
-  const [encodedList, setEncodedList] = useState("ECAk0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QEuLhK1TpMGMRNlOCPRfpOROUA")
+  const [encodedList, setEncodedList] = useState("ECAjGhnSHpR0s6gdRaqPWRrRVp64deQESnV0UqcdPA")
 
   useEffect(() => {
     try {
@@ -21,7 +21,7 @@ export default function DecodeTest() {
     // Init with a test list
 
     // An simple Yzmir decklist with no uniques
-    setEncodedList("ECAk0jEoUoInItIlUqUkUmErEuYwKLkyGxo2E4Y+E+QEuLhK1TpMGMRNlOCPRfpOROUA")
+    setEncodedList("ECAjGhnSHpR0s6gdRaqPWRrRVp64deQESnV0UqcdPA")
   }, [])
 
   return (
