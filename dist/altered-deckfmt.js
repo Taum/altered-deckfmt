@@ -68,7 +68,7 @@ class _t {
     throw `Unrecognized SetCode ${this.rarity}`;
   }
 }
-class j {
+class Q {
   constructor() {
     B(this, "setCode");
     B(this, "product");
@@ -78,7 +78,7 @@ class j {
     B(this, "uniqueId");
   }
   static decode(i, o) {
-    const u = new j();
+    const u = new Q();
     if (o.setCode === void 0)
       throw new Y("Tried to decode Card without SetCode in context");
     if (u.setCode = o.setCode, i.readSync(1) == 1)
@@ -157,25 +157,25 @@ class j {
     return i;
   }
   static fromId(i) {
-    let o = new j(), u = new _t(i);
+    let o = new Q(), u = new _t(i);
     return o.setCode = u.setId, o.product = u.productId, o.faction = u.factionId, o.numberInFaction = u.num_in_faction, o.rarity = u.rarityId, o.uniqueId = u.uniq_num, o;
   }
 }
-class Q {
+class j {
   constructor() {
     B(this, "quantity");
     // VLE: 2 (+6) bits
     B(this, "card");
   }
   static decode(i, o) {
-    const u = new Q(), a = i.readSync(2);
+    const u = new j(), a = i.readSync(2);
     if (a > 0)
       u.quantity = a;
     else {
       const c = i.readSync(6);
       u.quantity = c == 0 ? 0 : c + 3;
     }
-    return u.card = j.decode(i, o), u;
+    return u.card = Q.decode(i, o), u;
   }
   encode(i) {
     if (this.quantity > 0 && this.quantity <= 3)
@@ -195,8 +195,8 @@ class Q {
     };
   }
   static from(i, o) {
-    let u = new Q();
-    return u.quantity = i, u.card = j.fromId(o), u;
+    let u = new j();
+    return u.quantity = i, u.card = Q.fromId(o), u;
   }
 }
 class H {
@@ -213,7 +213,7 @@ class H {
     o.setCode = u.setCode;
     const a = i.readSync(6), c = new Array();
     for (let p = 0; p < a; p++)
-      c.push(Q.decode(i, o));
+      c.push(j.decode(i, o));
     return u.cardQty = c, o.setCode = void 0, u;
   }
   encode(i) {
@@ -226,7 +226,7 @@ class H {
   }
   static from(i) {
     let o = new H();
-    return o.cardQty = i.map((u) => Q.from(u.quantity, u.id)), o;
+    return o.cardQty = i.map((u) => j.from(u.quantity, u.id)), o;
   }
 }
 class D {
@@ -817,7 +817,7 @@ st.write = function(d, i, o, u, a, c) {
   };
   function Nt(r, t, e, n) {
     let s;
-    return t === 0 && e === r.length ? s = i.fromByteArray(r) : s = i.fromByteArray(r.slice(t, e)), n === "base64url" ? jt(s) : s;
+    return t === 0 && e === r.length ? s = i.fromByteArray(r) : s = i.fromByteArray(r.slice(t, e)), n === "base64url" ? Qt(s) : s;
   }
   function ht(r, t, e) {
     e = Math.min(r.length, e);
@@ -1190,10 +1190,10 @@ st.write = function(d, i, o, u, a, c) {
   function Yt(r) {
     return r.replaceAll(xt, gt).replaceAll(It, bt);
   }
-  function jt(r) {
+  function Qt(r) {
     return r.replaceAll(gt, xt).replaceAll(bt, It);
   }
-  function Qt(r) {
+  function jt(r) {
     if (r = r.split("=")[0], r = r.trim().replace(zt, ""), r.length < 2) return "";
     for (; r.length % 4 !== 0; )
       r = r + "=";
@@ -1267,7 +1267,7 @@ st.write = function(d, i, o, u, a, c) {
     return h;
   }
   function mt(r) {
-    return i.toByteArray(Qt(r));
+    return i.toByteArray(jt(r));
   }
   function W(r, t, e, n) {
     let s;
@@ -1787,6 +1787,7 @@ class he {
       return u.getFloat32(0, !1);
     if (i === 64)
       return u.getFloat64(0, !1);
+    throw new TypeError(`Invalid length (${i} bits) Only 4-byte (32 bit / single-precision) and 8-byte (64 bit / double-precision) IEEE 754 values are supported`);
   }
   readByteAligned(i) {
     let o = this.buffers[this._bufferIndex], u = o[this._offsetIntoBuffer / 8];
@@ -1916,10 +1917,6 @@ class he {
    */
   readSigned(i) {
     return this.ensureNoReadPending(), this.available >= i ? Promise.resolve(this.readSignedSync(i)) : this.block({ length: i, signed: !0 });
-  }
-  promise() {
-    let i, o;
-    return { promise: new Promise((a, c) => (i = a, o = c)), resolve: i, reject: o };
   }
   block(i) {
     return this._ended ? i.assure ? Promise.resolve(this.available) : Promise.reject(this.endOfStreamError(i.length)) : (this.blockedRequest = {

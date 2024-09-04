@@ -2,6 +2,10 @@
 
 let maskMap: Map<number, number>;
 
+declare global {
+    var BITSTREAM_TRACE: Boolean;
+}
+
 export interface StringEncodingOptions {
   encoding? : string;
   nullTerminated? : boolean;
@@ -427,6 +431,9 @@ export class BitstreamReader {
             return view.getFloat32(0, false);
         else if (length === 64)
             return view.getFloat64(0, false);
+        else {
+            throw new TypeError(`Invalid length (${length} bits) Only 4-byte (32 bit / single-precision) and 8-byte (64 bit / double-precision) IEEE 754 values are supported`);
+        }
     }
 
     private readByteAligned(consume: boolean): number {
@@ -757,8 +764,8 @@ export class BitstreamReader {
     }
 
     private promise<T>() {
-        let resolve: (value: T) => void;
-        let reject: (error: Error) => void;
+        let resolve: (value: T) => void = () => {};
+        let reject: (error: Error) => void = () => {};
         let promise = new Promise<T>((rs, rj) => (resolve = rs, reject = rj));
         return { promise, resolve, reject };
     }
