@@ -68,6 +68,7 @@ export class EncodableCard {
       case 1: id += RefSetCode.CoreKS; break;
       case 2: id += RefSetCode.Core; break;
       case 3: id += RefSetCode.Alize; break;
+	  case 4: id += RefSetCode.Bise; break;
     }
     id += "_"
     switch (this.product) {
