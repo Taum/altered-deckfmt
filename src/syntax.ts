@@ -68,7 +68,11 @@ export class EncodableCard {
       case 1: id += RefSetCode.CoreKS; break;
       case 2: id += RefSetCode.Core; break;
       case 3: id += RefSetCode.Alize; break;
-	  case 4: id += RefSetCode.Bise; break;
+      case 4: id += RefSetCode.Bise; break;
+      case 5: id += RefSetCode.TumultS3; break;
+      case 6: id += RefSetCode.WCQualifier25; break;
+      case 7: id += RefSetCode.WCSeries25; break;
+      case 8: id += RefSetCode.Cyclone; break;
     }
     id += "_"
     switch (this.product) {
@@ -128,7 +132,7 @@ export class EncodableCardQty {
     } else {
       const extended = reader.readSync(6)
       self.quantity = extended == 0 ? 0 : extended + 3
-    } 
+    }
     self.card = EncodableCard.decode(reader, context)
     return self
   }
@@ -146,7 +150,7 @@ export class EncodableCardQty {
       // qty=0 is written with 2 zeroes followed by 6 zeroes
       writer.write(8, 0)
     }
-    
+
     this.card.encode(writer)
   }
 
@@ -156,7 +160,7 @@ export class EncodableCardQty {
       id: this.card!.asCardId
     }
   }
-  
+
   static from(quantity: number, card: CardId): EncodableCardQty {
     let ecq = new EncodableCardQty()
     ecq.quantity = quantity
@@ -179,7 +183,7 @@ export class EncodableSetGroup {
 
     const cardRefCount = reader.readSync(6)
     const cards = new Array<EncodableCardQty>()
-    for (let i = 0 ; i < cardRefCount ; i++) {
+    for (let i = 0; i < cardRefCount; i++) {
       cards.push(EncodableCardQty.decode(reader, context))
     }
     self.cardQty = cards
@@ -187,7 +191,7 @@ export class EncodableSetGroup {
 
     return self
   }
-  
+
   encode(writer: BitstreamWriter) {
     if (this.cardQty.length <= 0) {
       throw new EncodingError("Cannot encode a SetGroup with 0 cards")
@@ -199,7 +203,7 @@ export class EncodableSetGroup {
       cardQty.encode(writer)
     }
   }
-  
+
   static from(rqs: CardRefQty[]) {
     let esg = new EncodableSetGroup()
     esg.cardQty = rqs.map((rq) => EncodableCardQty.from(rq.quantity, rq.id))
@@ -225,20 +229,20 @@ export class EncodableDeck {
 
     const groupsCount = reader.readSync(8)
     const groups = new Array<EncodableSetGroup>()
-    for (let i = 0 ; i < groupsCount ; i++) {
+    for (let i = 0; i < groupsCount; i++) {
       groups.push(EncodableSetGroup.decode(reader, context))
     }
     self.setGroups = groups
     return self
   }
-  
+
   encode(writer: BitstreamWriter) {
     writer.write(4, this.version)
     writer.write(8, this.setGroups.length)
     for (let group of this.setGroups) {
       group.encode(writer)
     }
-    
+
     if (writer.offset % 8 > 0) {
       const padding = (8 - writer.offset % 8)
       writer.write(padding, 0)
@@ -282,7 +286,7 @@ export class EncodableDeck {
 
 function arraySplitInGroupsOf<T>(array: Array<T>, maxGroupSize: number): Array<Array<T>> {
   let out: Array<Array<T>> = []
-  for (let i = 0 ; i < array.length ; i += maxGroupSize) {
+  for (let i = 0; i < array.length; i += maxGroupSize) {
     out.push(array.slice(i, i + maxGroupSize))
   }
   return out;

@@ -25,17 +25,25 @@ export enum RefRarity {
 
 export enum RefSetCode {
   // 0 = invalid
-  CoreKS = "COREKS", // 1
-  Core = "CORE",     // 2
-  Alize = "ALIZE",   // 3
-  Bise = "BISE",   	 // 4
+  CoreKS = "COREKS",       // 1
+  Core = "CORE",           // 2
+  Alize = "ALIZE",         // 3
+  Bise = "BISE",   	       // 4
+  TumultS3 = "TCS3",       // 5
+  WCQualifier25 = "WCQ25", // 6
+  WCSeries25 = "WCS25",    // 7
+  Cyclone = "CYCLONE",     // 8
 }
 
 export const SetCodeIdBitLengthMap: Record<number, number> = {
-  1: 5, // CoreKS range 0-31
-  2: 5, // Core   range 0-31
-  3: 6, // Alize  range 0-63
-  4: 6, // Bise   range 0-63
+  1: 5, // CoreKS        range 0-31
+  2: 5, // Core          range 0-31
+  3: 6, // Alize         range 0-63
+  4: 6, // Bise          range 0-63
+  5: 6, // TumultS3      range 0-63
+  6: 5, // WCQualifier25 range 0-31
+  7: 5, // WCSeries25    range 0-31
+  8: 7, // Cyclone       range 0-127
 }
 
 export type CardId = string
@@ -55,7 +63,7 @@ export class CardRefElements {
 
   constructor(id: CardId) {
     const match = id.match(/^ALT_(\w+)_(A|B|P)_(\w{2})_(\d{1,2})_(C|R1|R2|U)(?:_(\d+))?$/)
-    if (!match) { throw "unrecognized card id" }
+    if (!match) { throw "unrecognized card id '" + id + "'" }
 
     this.set_code = (match[1] as RefSetCode)
     this.product = (match[2] as RefProduct)
@@ -104,6 +112,10 @@ export class CardRefElements {
       case RefSetCode.Core: return 2;
       case RefSetCode.Alize: return 3;
       case RefSetCode.Bise: return 4;
+      case RefSetCode.TumultS3: return 5;
+      case RefSetCode.WCQualifier25: return 6;
+      case RefSetCode.WCSeries25: return 7;
+      case RefSetCode.Cyclone: return 8;
     }
     throw `Unrecognized SetCode ${this.set_code}`
   }

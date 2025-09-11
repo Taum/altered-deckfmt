@@ -140,7 +140,11 @@ This section contains the list of IDs that map with there respective plain text 
 1 = COREKS
 2 = CORE
 3 = ALIZE (Trial by Frost)
-4 = BISE (Whispers in the Maze)
+4 = BISE (Whispers from the Maze)
+5 = TCS3 (Tumult Faction Champion - Set 3)
+6 = WCQ25 (World Championship Qualifier 2025)
+7 = WCS25 (World Championship Series 2025)
+8 = CYCLONE (Skybound Odyssey)
 ```
 
 #### number_in_faction bitlength by set
@@ -152,6 +156,10 @@ Use the following table to determine the number of bits to use for the `number_i
 | `COREKS`, `CORE` | 5 |
 | `ALIZE` | 6 |
 | `BISE` | 6 |
+| `TCS3` | 6 |
+| `WCQ25` | 5 |
+| `WCS25` | 5 |
+| `CYCLONE` | 7 |
 
 _Rationale_: The "number in faction" of each card family is sequential from the start of the game. This allows reprints to use the same card family numbers (in other words, a `(faction, number in faction)` tuple uniquely identifies a card family). The consequence is that as each new set is released, the maximum value of the `number_in_faction` field increases. Using a variable number of bits allows us to represent any card in a set – regardless of future reprints – with minimal effort from the encoder/decoders, while still using a reasonably compact encoding.
 
