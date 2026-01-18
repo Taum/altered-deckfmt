@@ -115,8 +115,8 @@ See Faction in IDs section
 int(variable-length) number_in_faction
 The length of this field depends on the set being decoded, as specified in the Set section below.
 
-int(2) rarity
-See Rarity in IDs section
+int(variable-length) rarity
+The length of this field depends on the set being decoded, as specified in the Set section below.
 
 (Optional) int(16) UniqueId
 This MUST be present if and only if rarity == unique (int value 3)
@@ -137,29 +137,37 @@ This section contains the list of IDs that map with there respective plain text 
 0 is reserved for future use
 
 ```
-1 = COREKS
-2 = CORE
-3 = ALIZE (Trial by Frost)
-4 = BISE (Whispers from the Maze)
-5 = TCS3 (Tumult Faction Champion - Set 3)
-6 = WCQ25 (World Championship Qualifier 2025)
-7 = WCS25 (World Championship Series 2025)
-8 = CYCLONE (Skybound Odyssey)
+1  = COREKS
+2  = CORE
+3  = ALIZE (Trial by Frost)
+4  = BISE (Whispers from the Maze)
+5  = TCS3 (Tumult Faction Champion - Set 3)
+6  = WCQ25 (World Championship Qualifier 2025)
+7  = WCS25 (World Championship Series 2025)
+8  = CYCLONE (Skybound Odyssey)
+9  = DUSTER (Seeds of Unity)
+10 = DUSTERTOP (Seeds of Unity - Box Topper)
+11 = DUSTERCB (Seeds of Unity - Collector Booster)
+12 = DUSTEROP (Seeds of Unity - Organized Play)
 ```
 
 #### number_in_faction bitlength by set
 
 Use the following table to determine the number of bits to use for the `number_in_faction` field:
 
-| Set | Number of bits |
-| --- | -------------- |
+| Set | Number of bits | Notes |
+| --- | -------------- | --- |
 | `COREKS`, `CORE` | 5 |
 | `ALIZE` | 6 |
 | `BISE` | 6 |
 | `TCS3` | 6 |
-| `WCQ25` | 5 |
-| `WCS25` | 5 |
+| `WCQ25` | 5 | It only has cards from the `CORE` set
+| `WCS25` | 5 | It only has cards from the `CORE` set
 | `CYCLONE` | 7 |
+| `DUSTER` | 7 |
+| `DUSTERTOP` | 5 | It only has cards from the `CORE` set
+| `DUSTERCB` | 7 |
+| `DUSTEROP` | 7 |
 
 _Rationale_: The "number in faction" of each card family is sequential from the start of the game. This allows reprints to use the same card family numbers (in other words, a `(faction, number in faction)` tuple uniquely identifies a card family). The consequence is that as each new set is released, the maximum value of the `number_in_faction` field increases. Using a variable number of bits allows us to represent any card in a set – regardless of future reprints – with minimal effort from the encoder/decoders, while still using a reasonably compact encoding.
 
@@ -188,9 +196,26 @@ _Rationale_: The "number in faction" of each card family is sequential from the 
 
 ### Rarity
 
+| Set | Number of bits | Notes |
+| --- | -------------- | --- |
+| `COREKS`, `CORE` | 2 |
+| `ALIZE` | 2 |
+| `BISE` | 2 |
+| `TCS3` | 2 |
+| `WCQ25` | 2 |
+| `WCS25` | 2 |
+| `CYCLONE` | 2 |
+| `DUSTER` | 3 |
+| `DUSTERTOP` | 2 | It only has cards from the `CORE` set
+| `DUSTERCB` | 3 |
+| `DUSTEROP` | 2 | It doesn't have Exalt cards
+
+_Rationale_: The original number of codes for rarities (C, R1, R2, U) allowed to encode rarity using 2 bits. However, starting with Seeds of Unity, new sets may contain a new rarity (E). This doesn't seem to apply to all new sets. That said, it could be simplified by simply using 3 bits for all sets since Seeds of Unity (DUSTER).
+
 ```
 0 = C  (Common)
 1 = R1 (Rare - in faction)
 2 = R2 (Rare - out of faction)
 3 = U  (Unique)
+4 = E (Exalt)
 ```

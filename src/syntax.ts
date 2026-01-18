@@ -1,4 +1,4 @@
-import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements, RefProduct, SetCodeIdBitLengthMap } from './models';
+import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements, RefProduct, SetCodeIdBitLengthMap, RarityIdBitLengthMap } from './models';
 import { BitstreamReader, BitstreamWriter } from './bitstream';
 
 export class EncodableCard {
@@ -28,12 +28,13 @@ export class EncodableCard {
     if (self.faction == 0) {
       throw new DecodingError(`Invalid faction ID (${self.faction})`)
     }
-    const idBitLength = SetCodeIdBitLengthMap[self.setCode]
-    if (idBitLength == undefined) {
+    const nifBitLength = SetCodeIdBitLengthMap[self.setCode]
+    const rarityBitLength = RarityIdBitLengthMap[self.setCode]
+    if (nifBitLength == undefined || rarityBitLength == undefined) {
       throw new DecodingError(`Invalid set code (${self.setCode}) @${reader.offset}`)
     }
-    self.numberInFaction = reader.readSync(idBitLength)
-    self.rarity = reader.readSync(2)
+    self.numberInFaction = reader.readSync(nifBitLength)
+    self.rarity = reader.readSync(rarityBitLength)
     if (self.rarity == 3) {
       self.uniqueId = reader.readSync(16)
     }
@@ -48,12 +49,13 @@ export class EncodableCard {
       writer.write(2, this.product)
     }
     writer.write(3, this.faction)
-    const idBitLength = SetCodeIdBitLengthMap[this.setCode]
-    if (idBitLength == undefined) {
+    const nifBitLength = SetCodeIdBitLengthMap[this.setCode]
+    const rarityBitLength = RarityIdBitLengthMap[this.setCode]
+    if (nifBitLength == undefined || rarityBitLength == undefined) {
       throw new EncodingError(`Invalid set code (${this.setCode})`)
     }
-    writer.write(idBitLength, this.numberInFaction)
-    writer.write(2, this.rarity)
+    writer.write(nifBitLength, this.numberInFaction)
+    writer.write(rarityBitLength, this.rarity)
     if (this.uniqueId !== undefined) {
       if (this.uniqueId > 0xFFFF) {
         throw new EncodingError("Cannot encode unique ID greater than 65535")
@@ -73,6 +75,10 @@ export class EncodableCard {
       case 6: id += RefSetCode.WCQualifier25; break;
       case 7: id += RefSetCode.WCSeries25; break;
       case 8: id += RefSetCode.Cyclone; break;
+      case 9: id += RefSetCode.Duster; break;
+      case 10: id += RefSetCode.DusterTOP; break;
+      case 11: id += RefSetCode.DusterCB; break;
+      case 12: id += RefSetCode.DusterOP; break;
     }
     id += "_"
     switch (this.product) {
@@ -103,6 +109,7 @@ export class EncodableCard {
       case 1: id += RefRarity.Rare; break;
       case 2: id += RefRarity.RareOOF; break;
       case 3: id += RefRarity.Unique + "_" + this.uniqueId; break;
+      case 4: id += RefRarity.Exalt; break;
     }
     return id
   }
