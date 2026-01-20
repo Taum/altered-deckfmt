@@ -55,20 +55,16 @@ export const SetCodeIdBitLengthMap: Record<number, number> = {
   12: 7,  // Duster OP     range 0-127
 }
 
-export const RarityIdBitLengthMap: Record<number, number> = {
-  1: 2,   // CoreKS        range 0-3
-  2: 2,   // Core          range 0-3
-  3: 2,   // Alize         range 0-3
-  4: 2,   // Bise          range 0-3
-  5: 2,   // TumultS3      range 0-3
-  6: 2,   // WCQualifier25 range 0-3
-  7: 2,   // WCSeries25    range 0-3
-  8: 2,   // Cyclone       range 0-3
-  9: 3,   // Duster        range 0-4
-  10: 2,  // Duster TOP    range 0-3
-  11: 3,  // Duster CB     range 0-4
-  12: 2,  // Duster OP     range 0-3
-}
+export const SetCodeIdWithLegacyRarityLength = [
+  1,  // CoreKS
+  2,  // Core
+  3,  // Alize
+  4,  // Bise
+  5,  // TumultS3
+  6,  // WCQualifier25
+  7,  // WCSeries25
+  8,  // Cyclone
+]
 
 export type CardId = string
 

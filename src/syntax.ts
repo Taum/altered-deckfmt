@@ -1,4 +1,4 @@
-import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements, RefProduct, SetCodeIdBitLengthMap, RarityIdBitLengthMap } from './models';
+import { RefSetCode, RefFaction, RefRarity, CardId, CardRefQty, CardRefElements, RefProduct, SetCodeIdBitLengthMap, SetCodeIdWithLegacyRarityLength } from './models';
 import { BitstreamReader, BitstreamWriter } from './bitstream';
 
 export class EncodableCard {
@@ -15,6 +15,7 @@ export class EncodableCard {
       throw new DecodingError("Tried to decode Card without SetCode in context")
     }
     self.setCode = context.setCode
+
     const productBit = reader.readSync(1)
     if (productBit == 1) {
       self.product = null
@@ -24,20 +25,24 @@ export class EncodableCard {
         throw new DecodingError(`Invalid product ID (${self.product})`)
       }
     }
+
     self.faction = reader.readSync(3)
     if (self.faction == 0) {
       throw new DecodingError(`Invalid faction ID (${self.faction})`)
     }
+
     const nifBitLength = SetCodeIdBitLengthMap[self.setCode]
-    const rarityBitLength = RarityIdBitLengthMap[self.setCode]
-    if (nifBitLength == undefined || rarityBitLength == undefined) {
+    if (nifBitLength == undefined) {
       throw new DecodingError(`Invalid set code (${self.setCode}) @${reader.offset}`)
     }
     self.numberInFaction = reader.readSync(nifBitLength)
+
+    const rarityBitLength = self.setCode in SetCodeIdWithLegacyRarityLength ? 2 : 3
     self.rarity = reader.readSync(rarityBitLength)
     if (self.rarity == 3) {
       self.uniqueId = reader.readSync(16)
     }
+
     return self
   }
 
@@ -48,14 +53,18 @@ export class EncodableCard {
       writer.write(1, 0)
       writer.write(2, this.product)
     }
+
     writer.write(3, this.faction)
+
     const nifBitLength = SetCodeIdBitLengthMap[this.setCode]
-    const rarityBitLength = RarityIdBitLengthMap[this.setCode]
-    if (nifBitLength == undefined || rarityBitLength == undefined) {
+    if (nifBitLength == undefined) {
       throw new EncodingError(`Invalid set code (${this.setCode})`)
     }
     writer.write(nifBitLength, this.numberInFaction)
+
+    const rarityBitLength = this.setCode in SetCodeIdWithLegacyRarityLength ? 2 : 3
     writer.write(rarityBitLength, this.rarity)
+
     if (this.uniqueId !== undefined) {
       if (this.uniqueId > 0xFFFF) {
         throw new EncodingError("Cannot encode unique ID greater than 65535")
