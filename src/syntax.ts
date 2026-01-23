@@ -37,7 +37,7 @@ export class EncodableCard {
     }
     self.numberInFaction = reader.readSync(nifBitLength)
 
-    const rarityBitLength = self.setCode in SetCodeIdWithLegacyRarityLength ? 2 : 3
+    const rarityBitLength = SetCodeIdWithLegacyRarityLength.includes(self.setCode) ? 2 : 3
     self.rarity = reader.readSync(rarityBitLength)
     if (self.rarity == 3) {
       self.uniqueId = reader.readSync(16)
@@ -62,7 +62,7 @@ export class EncodableCard {
     }
     writer.write(nifBitLength, this.numberInFaction)
 
-    const rarityBitLength = this.setCode in SetCodeIdWithLegacyRarityLength ? 2 : 3
+    const rarityBitLength = SetCodeIdWithLegacyRarityLength.includes(this.setCode) ? 2 : 3
     writer.write(rarityBitLength, this.rarity)
 
     if (this.uniqueId !== undefined) {
