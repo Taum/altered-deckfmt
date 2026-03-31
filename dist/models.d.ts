@@ -31,7 +31,13 @@ export declare enum RefSetCode {
     Duster = "DUSTER",// 9
     DusterTOP = "DUSTERTOP",// 10
     DusterCB = "DUSTERCB",// 11
-    DusterOP = "DUSTEROP"
+    DusterOP = "DUSTEROP",// 12
+    Eole = "EOLE",// 13
+    EoleCB = "EOLECB",// 14
+    Judge = "JUDGE",// 15
+    Musubi = "MUSUBI",// 16
+    WCFinals25 = "WCF25",// 17
+    WCSeries26 = "WCS26"
 }
 export declare const SetCodeIdBitLengthMap: Record<number, number>;
 export declare const SetCodeIdWithLegacyRarityLength: number[];

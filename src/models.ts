@@ -38,21 +38,33 @@ export enum RefSetCode {
   DusterTOP = "DUSTERTOP",  // 10
   DusterCB = "DUSTERCB",    // 11
   DusterOP = "DUSTEROP",    // 12
+  Eole = "EOLE",            // 13
+  EoleCB = "EOLECB",        // 14
+  Judge = "JUDGE",           // 15
+  Musubi = "MUSUBI",         // 16
+  WCFinals25 = "WCF25",     // 17
+  WCSeries26 = "WCS26",     // 18
 }
 
 export const SetCodeIdBitLengthMap: Record<number, number> = {
-  1: 5,   // CoreKS        range 0-31
-  2: 5,   // Core          range 0-31
+  1: 6,   // CoreKS        range 0-63
+  2: 6,   // Core          range 0-63
   3: 6,   // Alize         range 0-63
-  4: 6,   // Bise          range 0-63
+  4: 7,   // Bise          range 0-127
   5: 6,   // TumultS3      range 0-63
   6: 5,   // WCQualifier25 range 0-31
   7: 5,   // WCSeries25    range 0-31
   8: 7,   // Cyclone       range 0-127
   9: 7,   // Duster        range 0-127
-  10: 5,  // Duster TOP    range 0-31
+  10: 6,  // Duster TOP    range 0-63
   11: 7,  // Duster CB     range 0-127
   12: 7,  // Duster OP     range 0-127
+  13: 7,  // Eole          range 0-127
+  14: 7,  // Eole CB       range 0-127
+  15: 5,  // Judge         range 0-31
+  16: 7,  // Musubi        range 0-127
+  17: 5,  // WCFinals25    range 0-31
+  18: 7,  // WCSeries26    range 0-127
 }
 
 export const SetCodeIdWithLegacyRarityLength = [
@@ -141,6 +153,12 @@ export class CardRefElements {
       case RefSetCode.DusterTOP: return 10;
       case RefSetCode.DusterCB: return 11;
       case RefSetCode.DusterOP: return 12;
+      case RefSetCode.Eole: return 13;
+      case RefSetCode.EoleCB: return 14;
+      case RefSetCode.Judge: return 15;
+      case RefSetCode.Musubi: return 16;
+      case RefSetCode.WCFinals25: return 17;
+      case RefSetCode.WCSeries26: return 18;
     }
     throw `Unrecognized SetCode ${this.set_code}`
   }

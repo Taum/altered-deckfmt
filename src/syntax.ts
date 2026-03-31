@@ -88,6 +88,12 @@ export class EncodableCard {
       case 10: id += RefSetCode.DusterTOP; break;
       case 11: id += RefSetCode.DusterCB; break;
       case 12: id += RefSetCode.DusterOP; break;
+      case 13: id += RefSetCode.Eole; break;
+      case 14: id += RefSetCode.EoleCB; break;
+      case 15: id += RefSetCode.Judge; break;
+      case 16: id += RefSetCode.Musubi; break;
+      case 17: id += RefSetCode.WCFinals25; break;
+      case 18: id += RefSetCode.WCSeries26; break;
     }
     id += "_"
     switch (this.product) {
@@ -106,9 +112,8 @@ export class EncodableCard {
       case 7: id += RefFaction.Neutral; break;
     }
     id += "_"
-    if (this.numberInFaction < 10 && !(this.faction == 7 && (this.setCode == 1 || this.setCode == 2))) {
-      // Fun fact: NE_1 (Mana Convergence) does not use 0 prefix on Core/CoreKS.
-      // This was likely an error and is fixed in Alize.
+    if (this.numberInFaction < 10 && !(this.faction == 7 && this.setCode == 1)) {
+      // Fun fact: NE_1 (Mana Convergence) does not use 0 prefix on CoreKS.
       id += "0"
     }
     id += this.numberInFaction
