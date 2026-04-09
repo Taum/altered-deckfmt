@@ -90,6 +90,11 @@ describe('encoding validations', () => {
     expect(() => encodeList(list)).toThrowError(/quantity/i)
   })
 
+  it('should throw an error when trying to encode a card with an ID beyond the set code', () => {
+    const list = "1 ALT_COREKS_B_LY_42_R1"
+    expect(() => encodeList(list)).toThrowError(/Family ID out of range/i)
+  })
+
   it('should filter out cards with a quantity of 0', () => {
     const list = "1 ALT_CORE_B_YZ_02_C\n0 ALT_CORE_B_AX_11_R1\n3 ALT_CORE_B_LY_28_C\n"
     const listWithoutZero = "1 ALT_CORE_B_YZ_02_C\n3 ALT_CORE_B_LY_28_C"

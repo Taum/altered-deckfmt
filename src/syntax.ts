@@ -60,6 +60,9 @@ export class EncodableCard {
     if (nifBitLength == undefined) {
       throw new EncodingError(`Invalid set code (${this.setCode})`)
     }
+    if (this.numberInFaction >= (1 << nifBitLength)) {
+      throw new EncodingError(`Family ID out of range (${this.numberInFaction}) for set ${this.setCode} (max: ${1 << nifBitLength - 1})`)
+    }
     writer.write(nifBitLength, this.numberInFaction)
 
     const rarityBitLength = SetCodeIdWithLegacyRarityLength.includes(this.setCode) ? 2 : 3

@@ -1,7 +1,7 @@
 var Je = Object.defineProperty;
 var ve = (l, i, s) => i in l ? Je(l, i, { enumerable: !0, configurable: !0, writable: !0, value: s }) : l[i] = s;
 var w = (l, i, s) => ve(l, typeof i != "symbol" ? i + "" : i, s);
-var K = /* @__PURE__ */ ((l) => (l.Booster = "B", l.Promo = "P", l.AltArt = "A", l))(K || {}), N = /* @__PURE__ */ ((l) => (l.Axiom = "AX", l.Bravos = "BR", l.Lyra = "LY", l.Muna = "MU", l.Ordis = "OR", l.Yzmir = "YZ", l.Neutral = "NE", l))(N || {}), G = /* @__PURE__ */ ((l) => (l.Common = "C", l.Rare = "R1", l.RareOOF = "R2", l.Unique = "U", l.Exalt = "E", l))(G || {}), R = /* @__PURE__ */ ((l) => (l.CoreKS = "COREKS", l.Core = "CORE", l.Alize = "ALIZE", l.Bise = "BISE", l.TumultS3 = "TCS3", l.WCQualifier25 = "WCQ25", l.WCSeries25 = "WCS25", l.Cyclone = "CYCLONE", l.Duster = "DUSTER", l.DusterTOP = "DUSTERTOP", l.DusterCB = "DUSTERCB", l.DusterOP = "DUSTEROP", l))(R || {});
+var Z = /* @__PURE__ */ ((l) => (l.Booster = "B", l.Promo = "P", l.AltArt = "A", l))(Z || {}), N = /* @__PURE__ */ ((l) => (l.Axiom = "AX", l.Bravos = "BR", l.Lyra = "LY", l.Muna = "MU", l.Ordis = "OR", l.Yzmir = "YZ", l.Neutral = "NE", l))(N || {}), G = /* @__PURE__ */ ((l) => (l.Common = "C", l.Rare = "R1", l.RareOOF = "R2", l.Unique = "U", l.Exalt = "E", l))(G || {}), R = /* @__PURE__ */ ((l) => (l.CoreKS = "COREKS", l.Core = "CORE", l.Alize = "ALIZE", l.Bise = "BISE", l.TumultS3 = "TCS3", l.WCQualifier25 = "WCQ25", l.WCSeries25 = "WCS25", l.Cyclone = "CYCLONE", l.Duster = "DUSTER", l.DusterTOP = "DUSTERTOP", l.DusterCB = "DUSTERCB", l.DusterOP = "DUSTEROP", l))(R || {});
 const se = {
   1: 5,
   // CoreKS        range 0-31
@@ -133,7 +133,7 @@ class Ce {
     throw `Unrecognized SetCode ${this.set_code}`;
   }
 }
-class j {
+class H {
   constructor() {
     w(this, "setCode");
     w(this, "product");
@@ -143,7 +143,7 @@ class j {
     w(this, "uniqueId");
   }
   static decode(i, s) {
-    const f = new j();
+    const f = new H();
     if (s.setCode === void 0)
       throw new W("Tried to decode Card without SetCode in context");
     if (f.setCode = s.setCode, i.readSync(1) == 1)
@@ -163,12 +163,14 @@ class j {
     this.product == null ? i.write(1, 1) : (i.write(1, 0), i.write(2, this.product)), i.write(3, this.faction);
     const s = se[this.setCode];
     if (s == null)
-      throw new Z(`Invalid set code (${this.setCode})`);
+      throw new j(`Invalid set code (${this.setCode})`);
+    if (this.numberInFaction >= 1 << s)
+      throw new j(`Family ID out of range (${this.numberInFaction}) for set ${this.setCode} (max: ${1 << s - 1})`);
     i.write(s, this.numberInFaction);
     const f = Fe.includes(this.setCode) ? 2 : 3;
     if (i.write(f, this.rarity), this.uniqueId !== void 0) {
       if (this.uniqueId > 65535)
-        throw new Z("Cannot encode unique ID greater than 65535");
+        throw new j("Cannot encode unique ID greater than 65535");
       i.write(16, this.uniqueId);
     }
   }
@@ -214,13 +216,13 @@ class j {
     }
     switch (i += "_", this.product) {
       case null:
-        i += K.Booster;
+        i += Z.Booster;
         break;
       case 1:
-        i += K.Promo;
+        i += Z.Promo;
         break;
       case 2:
-        i += K.AltArt;
+        i += Z.AltArt;
         break;
     }
     switch (i += "_", this.faction) {
@@ -266,32 +268,32 @@ class j {
     return i;
   }
   static fromId(i) {
-    let s = new j(), f = new Ce(i);
+    let s = new H(), f = new Ce(i);
     return s.setCode = f.setId, s.product = f.productId, s.faction = f.factionId, s.numberInFaction = f.num_in_faction, s.rarity = f.rarityId, s.uniqueId = f.uniq_num, s;
   }
 }
-class H {
+class V {
   constructor() {
     w(this, "quantity");
     // VLE: 2 (+6) bits
     w(this, "card");
   }
   static decode(i, s) {
-    const f = new H(), c = i.readSync(2);
+    const f = new V(), c = i.readSync(2);
     if (c > 0)
       f.quantity = c;
     else {
       const a = i.readSync(6);
       f.quantity = a == 0 ? 0 : a + 3;
     }
-    return f.card = j.decode(i, s), f;
+    return f.card = H.decode(i, s), f;
   }
   encode(i) {
     if (this.quantity > 0 && this.quantity <= 3)
       i.write(2, this.quantity);
     else if (this.quantity > 3) {
       if (this.quantity > 65)
-        throw new Z(`Cannot encode card quantity (${this.quantity}) greater than 65`);
+        throw new j(`Cannot encode card quantity (${this.quantity}) greater than 65`);
       i.write(2, 0), i.write(6, this.quantity - 3);
     } else
       i.write(8, 0);
@@ -304,8 +306,8 @@ class H {
     };
   }
   static from(i, s) {
-    let f = new H();
-    return f.quantity = i, f.card = j.fromId(s), f;
+    let f = new V();
+    return f.quantity = i, f.card = H.fromId(s), f;
   }
 }
 class z {
@@ -322,12 +324,12 @@ class z {
     s.setCode = f.setCode;
     const c = i.readSync(6), a = new Array();
     for (let p = 0; p < c; p++)
-      a.push(H.decode(i, s));
+      a.push(V.decode(i, s));
     return f.cardQty = a, s.setCode = void 0, f;
   }
   encode(i) {
     if (this.cardQty.length <= 0)
-      throw new Z("Cannot encode a SetGroup with 0 cards");
+      throw new j("Cannot encode a SetGroup with 0 cards");
     const s = this.cardQty[0].card.setCode;
     i.write(8, s), i.write(6, this.cardQty.length);
     for (let f of this.cardQty)
@@ -335,7 +337,7 @@ class z {
   }
   static from(i) {
     let s = new z();
-    return s.cardQty = i.map((f) => H.from(f.quantity, f.id)), s;
+    return s.cardQty = i.map((f) => V.from(f.quantity, f.id)), s;
   }
   static isValidSetCode(i) {
     return se[i] !== void 0;
@@ -400,7 +402,7 @@ class W extends Error {
     super(i), this.name = "DecodingError";
   }
 }
-class Z extends Error {
+class j extends Error {
   constructor(i) {
     super(i), this.name = "EncodingError";
   }
@@ -735,7 +737,7 @@ oe.write = function(l, i, s, f, c, a) {
         case "utf-8":
           return ae(this, e, t);
         case "ascii":
-          return De(this, e, t);
+          return qe(this, e, t);
         case "latin1":
         case "binary":
           return Pe(this, e, t);
@@ -876,17 +878,17 @@ oe.write = function(l, i, s, f, c, a) {
     return n;
   }
   function Le(r, e, t, n) {
-    return V(ie(e, r.length - t), r, t, n);
+    return X(ie(e, r.length - t), r, t, n);
   }
   function $e(r, e, t, n) {
-    return V(Ve(e), r, t, n);
+    return X(Ve(e), r, t, n);
   }
   function Ne(r, e, t, n, o) {
     const h = o === "base64url" ? Ye(e) : e;
-    return V(Ee(h), r, t, n);
+    return X(Ee(h), r, t, n);
   }
   function Oe(r, e, t, n) {
-    return V(Xe(e, r.length - t), r, t, n);
+    return X(Xe(e, r.length - t), r, t, n);
   }
   u.prototype.write = function(e, t, n, o) {
     if (t === void 0)
@@ -962,10 +964,10 @@ oe.write = function(l, i, s, f, c, a) {
       }
       d === null ? (d = 65533, B = 1) : d > 65535 && (d -= 65536, n.push(d >>> 10 & 1023 | 55296), d = 56320 | d & 1023), n.push(d), o += B;
     }
-    return qe(n);
+    return De(n);
   }
   const ce = 4096;
-  function qe(r) {
+  function De(r) {
     const e = r.length;
     if (e <= ce)
       return String.fromCharCode.apply(String, r);
@@ -977,7 +979,7 @@ oe.write = function(l, i, s, f, c, a) {
       );
     return t;
   }
-  function De(r, e, t) {
+  function qe(r, e, t) {
     let n = "";
     t = Math.min(r.length, t);
     for (let o = e; o < t; ++o)
@@ -1039,13 +1041,13 @@ oe.write = function(l, i, s, f, c, a) {
   }, u.prototype.readUint32BE = u.prototype.readUInt32BE = function(e, t) {
     return e = e >>> 0, t || S(e, 4, this.length), this[e] * 16777216 + (this[e + 1] << 16 | this[e + 2] << 8 | this[e + 3]);
   }, u.prototype.readBigUInt64LE = $(function(e) {
-    e = e >>> 0, D(e, "offset");
+    e = e >>> 0, q(e, "offset");
     const t = this[e], n = this[e + 7];
     (t === void 0 || n === void 0) && Y(e, this.length - 8);
     const o = t + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + this[++e] * 2 ** 24, h = this[++e] + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + n * 2 ** 24;
     return BigInt(o) + (BigInt(h) << BigInt(32));
   }), u.prototype.readBigUInt64BE = $(function(e) {
-    e = e >>> 0, D(e, "offset");
+    e = e >>> 0, q(e, "offset");
     const t = this[e], n = this[e + 7];
     (t === void 0 || n === void 0) && Y(e, this.length - 8);
     const o = t * 2 ** 24 + this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + this[++e], h = this[++e] * 2 ** 24 + this[++e] * 2 ** 16 + this[++e] * 2 ** 8 + n;
@@ -1077,13 +1079,13 @@ oe.write = function(l, i, s, f, c, a) {
   }, u.prototype.readInt32BE = function(e, t) {
     return e = e >>> 0, t || S(e, 4, this.length), this[e] << 24 | this[e + 1] << 16 | this[e + 2] << 8 | this[e + 3];
   }, u.prototype.readBigInt64LE = $(function(e) {
-    e = e >>> 0, D(e, "offset");
+    e = e >>> 0, q(e, "offset");
     const t = this[e], n = this[e + 7];
     (t === void 0 || n === void 0) && Y(e, this.length - 8);
     const o = this[e + 4] + this[e + 5] * 2 ** 8 + this[e + 6] * 2 ** 16 + (n << 24);
     return (BigInt(o) << BigInt(32)) + BigInt(t + this[++e] * 2 ** 8 + this[++e] * 2 ** 16 + this[++e] * 2 ** 24);
   }), u.prototype.readBigInt64BE = $(function(e) {
-    e = e >>> 0, D(e, "offset");
+    e = e >>> 0, q(e, "offset");
     const t = this[e], n = this[e + 7];
     (t === void 0 || n === void 0) && Y(e, this.length - 8);
     const o = (t << 24) + // Overflow
@@ -1245,7 +1247,7 @@ oe.write = function(l, i, s, f, c, a) {
     }
     return this;
   };
-  const q = {};
+  const D = {};
   function re(r, e, t) {
     function n() {
       const o = new t(e.apply(null, arguments));
@@ -1253,7 +1255,7 @@ oe.write = function(l, i, s, f, c, a) {
     }
     Object.setPrototypeOf(n.prototype, t.prototype), Object.setPrototypeOf(n, t), n.prototype.toString = function() {
       return `${this.name} [${r}]: ${this.message}`;
-    }, q[r] = n;
+    }, D[r] = n;
   }
   re(
     "ERR_BUFFER_OUT_OF_BOUNDS",
@@ -1283,22 +1285,22 @@ oe.write = function(l, i, s, f, c, a) {
     return `${r.slice(0, t)}${e}`;
   }
   function ze(r, e, t) {
-    D(e, "offset"), (r[e] === void 0 || r[e + t] === void 0) && Y(e, r.length - (t + 1));
+    q(e, "offset"), (r[e] === void 0 || r[e + t] === void 0) && Y(e, r.length - (t + 1));
   }
   function ge(r, e, t, n, o, h) {
     if (r > t || r < e) {
       const d = typeof e == "bigint" ? "n" : "";
       let B;
-      throw e === 0 || e === BigInt(0) ? B = `>= 0${d} and < 2${d} ** ${(h + 1) * 8}${d}` : B = `>= -(2${d} ** ${(h + 1) * 8 - 1}${d}) and < 2 ** ${(h + 1) * 8 - 1}${d}`, new q.ERR_OUT_OF_RANGE("value", B, r);
+      throw e === 0 || e === BigInt(0) ? B = `>= 0${d} and < 2${d} ** ${(h + 1) * 8}${d}` : B = `>= -(2${d} ** ${(h + 1) * 8 - 1}${d}) and < 2 ** ${(h + 1) * 8 - 1}${d}`, new D.ERR_OUT_OF_RANGE("value", B, r);
     }
     ze(n, o, h);
   }
-  function D(r, e) {
+  function q(r, e) {
     if (typeof r != "number")
-      throw new q.ERR_INVALID_ARG_TYPE(e, "number", r);
+      throw new D.ERR_INVALID_ARG_TYPE(e, "number", r);
   }
   function Y(r, e, t) {
-    throw Math.floor(r) !== r ? (D(r, t), new q.ERR_OUT_OF_RANGE("offset", "an integer", r)) : e < 0 ? new q.ERR_BUFFER_OUT_OF_BOUNDS() : new q.ERR_OUT_OF_RANGE(
+    throw Math.floor(r) !== r ? (q(r, t), new D.ERR_OUT_OF_RANGE("offset", "an integer", r)) : e < 0 ? new D.ERR_BUFFER_OUT_OF_BOUNDS() : new D.ERR_OUT_OF_RANGE(
       "offset",
       `>= 0 and <= ${e}`,
       r
@@ -1387,7 +1389,7 @@ oe.write = function(l, i, s, f, c, a) {
   function Ee(r) {
     return i.toByteArray(He(r));
   }
-  function V(r, e, t, n) {
+  function X(r, e, t, n) {
     let o;
     for (o = 0; o < n && !(o + t >= e.length || o >= r.length); ++o)
       e[o + t] = r[o];
@@ -1621,7 +1623,7 @@ class ct {
     }
   }
 }
-let X;
+let K;
 class lt {
   constructor() {
     w(this, "buffers", []);
@@ -1878,12 +1880,12 @@ class lt {
     return s & f ? -((~(s - 1) & c) >>> 0) : s;
   }
   maskOf(i) {
-    if (!X) {
-      X = /* @__PURE__ */ new Map();
+    if (!K) {
+      K = /* @__PURE__ */ new Map();
       for (let s = 0; s <= 64; ++s)
-        X.set(s, Math.pow(2, s) - 1);
+        K.set(s, Math.pow(2, s) - 1);
     }
-    return X.get(i) ?? Math.pow(2, i) - 1;
+    return K.get(i) ?? Math.pow(2, i) - 1;
   }
   /**
    * Read an IEEE 754 floating point value with the given bit length (32 or 64). If there are not 

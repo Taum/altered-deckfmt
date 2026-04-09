@@ -1,6 +1,6 @@
 {
   "name": "altered-deckfmt",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "A compact format for storing Altered TCG decklists",
   "type": "module",
   "files": [
