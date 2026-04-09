@@ -42,12 +42,31 @@ export enum RefSetCode {
 
 export type CardId = string
 
+const SetNameToId: Record<string, number> = {
+  COREKS: 1,
+  CORE: 2,
+  ALIZE: 3,
+  BISE: 4,
+  TCS3: 5,
+  WCQ25: 6,
+  WCS25: 7,
+  CYCLONE: 8,
+  DUSTER: 9,
+  DUSTERTOP: 10,
+  DUSTERCB: 11,
+  DUSTEROP: 12,
+}
+
 export interface CardRefQty {
   quantity: number
   id: CardId
 }
 
 export class CardRefElements {
+  // Raw set name token from the ID (e.g. "CORE", "DUSTEROP").
+  // V3 uses this as the source of truth instead of RefSetCode.
+  set_code_name: string
+  // Kept for backwards compatibility (V1/V2). Prefer set_code_name when possible.
   set_code: RefSetCode
   product: RefProduct
   faction: RefFaction
@@ -59,6 +78,7 @@ export class CardRefElements {
     const match = id.match(/^ALT_(\w+)_(A|B|P)_(\w{2})_(\d+)_(C|R1|R2|U|E)(?:_(\d+))?$/)
     if (!match) { throw "unrecognized card id '" + id + "'" }
 
+    this.set_code_name = match[1]
     this.set_code = (match[1] as RefSetCode)
     this.product = (match[2] as RefProduct)
     this.faction = (match[3] as RefFaction)
@@ -102,20 +122,10 @@ export class CardRefElements {
     throw `Unrecognized Rarity ${this.rarity}`
   }
   get setId(): number {
-    switch (this.set_code) {
-      case RefSetCode.CoreKS: return 1;
-      case RefSetCode.Core: return 2;
-      case RefSetCode.Alize: return 3;
-      case RefSetCode.Bise: return 4;
-      case RefSetCode.TumultS3: return 5;
-      case RefSetCode.WCQualifier25: return 6;
-      case RefSetCode.WCSeries25: return 7;
-      case RefSetCode.Cyclone: return 8;
-      case RefSetCode.Duster: return 9;
-      case RefSetCode.DusterTOP: return 10;
-      case RefSetCode.DusterCB: return 11;
-      case RefSetCode.DusterOP: return 12;
+    const id = SetNameToId[this.set_code_name]
+    if (id !== undefined) {
+      return id
     }
-    throw `Unrecognized SetCode ${this.set_code}`
+    throw `Unrecognized SetCode ${this.set_code_name}`
   }
 }

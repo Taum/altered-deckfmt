@@ -4,7 +4,7 @@ import {
   it,
   test,
 } from 'vitest'
-import { encodeList, decodeList, encodeListV2, decodeListV2 } from '../src'
+import { encodeList, decodeList, encodeListV2, decodeListV2, encodeListV3, decodeListV3 } from '../src'
 import * as fs from 'fs'
 import { RefSetCode } from '../src/models'
 
@@ -78,6 +78,17 @@ describe('file-based tests (V2)', () => {
     // expect(encoded).toEqual(expectedEncoded[fileName])
     // Compare decoding results
     const decoded = decodeListV2(encoded)
+    expectEqualLists(decoded, content)
+  })
+})
+
+describe('file-based tests (V3)', () => {
+  test.for(files)("With file '%s'", (fileName) => {
+    const content = fs.readFileSync(fileName, { encoding: 'utf8' })
+    // Compare encoding results
+    const encoded = encodeListV3(content)
+    // Compare decoding results
+    const decoded = decodeListV3(encoded)
     expectEqualLists(decoded, content)
   })
 })
