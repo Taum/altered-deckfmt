@@ -40,32 +40,6 @@ export enum RefSetCode {
   DusterOP = "DUSTEROP",    // 12
 }
 
-export const SetCodeIdBitLengthMap: Record<number, number> = {
-  1: 5,   // CoreKS        range 0-31
-  2: 5,   // Core          range 0-31
-  3: 6,   // Alize         range 0-63
-  4: 6,   // Bise          range 0-63
-  5: 6,   // TumultS3      range 0-63
-  6: 5,   // WCQualifier25 range 0-31
-  7: 5,   // WCSeries25    range 0-31
-  8: 7,   // Cyclone       range 0-127
-  9: 7,   // Duster        range 0-127
-  10: 5,  // Duster TOP    range 0-31
-  11: 7,  // Duster CB     range 0-127
-  12: 7,  // Duster OP     range 0-127
-}
-
-export const SetCodeIdWithLegacyRarityLength = [
-  1,  // CoreKS
-  2,  // Core
-  3,  // Alize
-  4,  // Bise
-  5,  // TumultS3
-  6,  // WCQualifier25
-  7,  // WCSeries25
-  8,  // Cyclone
-]
-
 export type CardId = string
 
 export interface CardRefQty {

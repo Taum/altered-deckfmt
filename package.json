@@ -16,7 +16,9 @@
     "build": "vite build",
     "build:site": "vite -c vite.site.config.ts build",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "test:benchmark": "vitest run test/benchmark.test.ts",
+    "test:benchmark:watch": "vitest watch test/benchmark.test.ts"
   },
   "bin": {
     "altered-deckfmt": "cli/index.js"
