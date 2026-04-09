@@ -15,10 +15,10 @@
     "dev": "vite",
     "build": "vite build",
     "build:site": "vite -c vite.site.config.ts build",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
-    "test:benchmark": "vitest run test/benchmark.test.ts",
-    "test:benchmark:watch": "vitest watch test/benchmark.test.ts"
+    "test": "vitest run --exclude test/benchmark",
+    "test:watch": "vitest watch --exclude test/benchmark",
+    "benchmark": "vitest run test/benchmark/runlength.test.ts",
+    "benchmark:watch": "vitest watch test/benchmark/runlength.test.ts"
   },
   "bin": {
     "altered-deckfmt": "cli/index.js"

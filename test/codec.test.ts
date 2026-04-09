@@ -4,7 +4,7 @@ import {
   it,
   test,
 } from 'vitest'
-import { encodeList, decodeList } from '../src'
+import { encodeList, decodeList, encodeListV2, decodeListV2 } from '../src'
 import * as fs from 'fs'
 import { RefSetCode } from '../src/models'
 
@@ -58,7 +58,7 @@ function expectEqualLists(actual: string, expected: string) {
   expect(actualArr).toEqual(expectedArr)
 }
 
-describe('file-based tests', () => {
+describe('file-based tests (V1)', () => {
   test.for(files)("With file '%s'", (fileName) => {
     const content = fs.readFileSync(fileName, { encoding: 'utf8' })
     // Compare encoding results
@@ -66,6 +66,18 @@ describe('file-based tests', () => {
     expect(encoded).toEqual(expectedEncoded[fileName])
     // Compare decoding results
     const decoded = decodeList(encoded)
+    expectEqualLists(decoded, content)
+  })
+})
+
+describe('file-based tests (V2)', () => {
+  test.for(files)("With file '%s'", (fileName) => {
+    const content = fs.readFileSync(fileName, { encoding: 'utf8' })
+    // Compare encoding results
+    const encoded = encodeListV2(content)
+    // expect(encoded).toEqual(expectedEncoded[fileName])
+    // Compare decoding results
+    const decoded = decodeListV2(encoded)
     expectEqualLists(decoded, content)
   })
 })

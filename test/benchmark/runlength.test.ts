@@ -1,5 +1,5 @@
 import { describe, it } from "vitest"
-import { decodeList, encodeList, encodeListV2 } from "../src/encoder"
+import { decodeList, encodeList, encodeListV2 } from "../../src/encoder"
 import * as fs from 'fs'
 
 const sampleTextFile = fs.readFileSync('test/benchmark/sample_decklists.txt', 'utf8')
@@ -17,7 +17,8 @@ describe('benchmark v1 vs. v2', () => {
     const lengths: { v1: number, v2: number, sub1_minus_2: number }[] = []
     let d_i = 1;
     for (const decklist of sampleDecklists) {
-      console.log(`==================\n#${d_i}:\n${decklist}`)
+      console.log(`==================\n#${d_i}`)
+      // console.log(`${decklist}`)
       const encoded_v1 = encodeList(decklist)
       const encoded_v2 = encodeListV2(decklist)
       console.log(`v1 (${encoded_v1.length}): ${encoded_v1}\nv2 (${encoded_v2.length}): ${encoded_v2}`)
@@ -28,9 +29,6 @@ describe('benchmark v1 vs. v2', () => {
     const lengths_v1 = lengths.map(x => x.v1).sort((a, b) => a - b)
     const lengths_v2 = lengths.map(x => x.v2).sort((a, b) => a - b)
     const lengths_diff = lengths.map(x => x.sub1_minus_2).sort((a, b) => a - b)
-    console.log(lengths_v1)
-    console.log(lengths_v2)
-    console.log(lengths_diff)
     const v1_avg = lengths_v1.reduce((a, b) => a + b, 0) / lengths_v1.length
     const v2_avg = lengths_v2.reduce((a, b) => a + b, 0) / lengths_v2.length
     const v1_p50 = lengths_v1[Math.floor(lengths_v1.length * 0.5)]
@@ -46,8 +44,6 @@ describe('benchmark v1 vs. v2', () => {
       acc[diff] = (acc[diff] || 0) + 1
       return acc
     }, {} as Record<number, number>)
-    console.log(diff_freqs)
-
 
     console.table({
       v1: {

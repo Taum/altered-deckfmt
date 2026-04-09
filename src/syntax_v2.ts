@@ -16,6 +16,8 @@ const SetCodeIdBitLengthMap: Record<number, number> = {
   12: 7,  // Duster OP     range 0-127
 }
 
+const INITIAL_FAMILY_ID_BIT_LENGTH = 12;
+
 const SetCodeIdWithLegacyRarityLength = [
   1,  // CoreKS
   2,  // Core
@@ -37,7 +39,7 @@ export class EncodableCard {
   rarity: number
   uniqueId: number | undefined
 
-  static decode(reader: BitstreamReader, context: DecodingContext) {
+  static decode(reader: BitstreamReader, context: DecodingContext, isFirstCard: boolean) {
     const self = new EncodableCard()
     if (context.setCode === undefined) {
       throw new DecodingError("Tried to decode Card without SetCode in context")
@@ -59,12 +61,19 @@ export class EncodableCard {
       throw new DecodingError(`Invalid faction ID (${self.faction})`)
     }
 
-    const nifBitLength = SetCodeIdBitLengthMap[self.setCode]
-    if (nifBitLength == undefined) {
-      throw new DecodingError(`Invalid set code (${self.setCode}) @${reader.offset}`)
+    if (isFirstCard) {
+      // V2 stores the first card's family id as a fixed-length value.
+      self.numberInFaction = reader.readSync(INITIAL_FAMILY_ID_BIT_LENGTH)
+      context.familyIdMin = self.numberInFaction
+    } else {
+      if (context.familyIdMin === undefined || context.familyIdBitLength === undefined) {
+        throw new DecodingError("Tried to decode Card without familyIdMin/familyIdBitLength in context")
+      }
+      const nifOffset = reader.readSync(context.familyIdBitLength)
+      self.numberInFaction = context.familyIdMin + nifOffset
     }
-    self.numberInFaction = reader.readSync(nifBitLength)
 
+    // V2 always uses 3 bits for rarity.
     const rarityBitLength = SetCodeIdWithLegacyRarityLength.includes(self.setCode) ? 2 : 3
     self.rarity = reader.readSync(rarityBitLength)
     if (self.rarity == 3) {
@@ -85,10 +94,10 @@ export class EncodableCard {
     writer.write(3, this.faction)
 
     if (isFirstCard) {
-      if (this.numberInFaction > 0x3FF) {
-        throw new EncodingError(`First Family ID out of range (${this.numberInFaction}) for set ${this.setCode} (max value 1023)`)
+      if (this.numberInFaction > ((1 << INITIAL_FAMILY_ID_BIT_LENGTH) - 1)) {
+        throw new EncodingError(`First Family ID out of range (${this.numberInFaction}) for set ${this.setCode} (max value ${((1 << INITIAL_FAMILY_ID_BIT_LENGTH) - 1)})`)
       }
-      writer.write(10, this.numberInFaction)
+      writer.write(INITIAL_FAMILY_ID_BIT_LENGTH, this.numberInFaction)
     } else {
       const nifOffset = this.numberInFaction - familyIdMin
       if (nifOffset >= (1 << familyIdBitLength)) {
@@ -96,7 +105,8 @@ export class EncodableCard {
       }
       writer.write(familyIdBitLength, nifOffset)
     }
-    writer.write(3, this.rarity)
+    const rarityBitLength = SetCodeIdWithLegacyRarityLength.includes(this.setCode) ? 2 : 3
+    writer.write(rarityBitLength, this.rarity)
 
     if (this.uniqueId !== undefined) {
       if (this.uniqueId > 0xFFFF) {
@@ -173,7 +183,7 @@ export class EncodableCardQty {
   quantity: number // VLE: 2 (+6) bits
   card: EncodableCard
 
-  static decode(reader: BitstreamReader, context: DecodingContext): EncodableCardQty {
+  static decode(reader: BitstreamReader, context: DecodingContext, isFirstCard: boolean): EncodableCardQty {
     const self = new EncodableCardQty()
     const simpleQty = reader.readSync(2)
     if (simpleQty > 0) {
@@ -182,7 +192,7 @@ export class EncodableCardQty {
       const extended = reader.readSync(6)
       self.quantity = extended == 0 ? 0 : extended + 3
     }
-    self.card = EncodableCard.decode(reader, context)
+    self.card = EncodableCard.decode(reader, context, isFirstCard)
     return self
   }
 
@@ -231,12 +241,19 @@ export class EncodableSetGroup {
     context.setCode = self.setCode
 
     const cardRefCount = reader.readSync(6)
+    if (cardRefCount > 1) {
+      context.familyIdBitLength = reader.readSync(4)
+    } else {
+      context.familyIdBitLength = undefined
+    }
     const cards = new Array<EncodableCardQty>()
     for (let i = 0; i < cardRefCount; i++) {
-      cards.push(EncodableCardQty.decode(reader, context))
+      cards.push(EncodableCardQty.decode(reader, context, i === 0))
     }
     self.cardQty = cards
     context.setCode = undefined
+    context.familyIdMin = undefined
+    context.familyIdBitLength = undefined
 
     return self
   }
@@ -245,14 +262,22 @@ export class EncodableSetGroup {
     if (this.cardQty.length <= 0) {
       throw new EncodingError("Cannot encode a SetGroup with 0 cards")
     }
-    const [familyIdMin, familyIdMax] = this.cardQty.reduce(([min, max], cardQty) => [Math.min(min, cardQty.card.numberInFaction), Math.max(max, cardQty.card.numberInFaction)], [Infinity, -Infinity])
+    // V2 decoding uses the first card's absolute 10-bit family id as the base for
+    // subsequent offset-encoded family ids. Ensure deterministic ordering so the
+    // first card is always the minimum family id used as the offset base.
+    const sortedCardQty = [...this.cardQty].sort(
+      (a, b) => a.card.numberInFaction - b.card.numberInFaction,
+    )
+
+    const familyIdMin = sortedCardQty[0].card.numberInFaction
+    const familyIdMax = sortedCardQty[sortedCardQty.length - 1].card.numberInFaction
     
     const familyIdBitLength = Math.ceil(Math.log2(familyIdMax - familyIdMin + 1))
-    if (familyIdBitLength > 16) {
+    if (familyIdBitLength > 0xF) {
       throw new EncodingError(`Family ID range is too large (${familyIdMax - familyIdMin + 1}) for set ${this.setCode} (max: 65535)`)
     }
-    if (familyIdMin > 1024) {
-      throw new EncodingError(`Family ID minimum is too large (${familyIdMin}) for set ${this.setCode} (max: 1024)`)
+    if (familyIdMin > ((1 << INITIAL_FAMILY_ID_BIT_LENGTH) - 1)) {
+      throw new EncodingError(`Family ID minimum is too large (${familyIdMin}) for set ${this.setCode} (max: ${((1 << INITIAL_FAMILY_ID_BIT_LENGTH) - 1)})`)
     }
 
     
@@ -260,15 +285,18 @@ export class EncodableSetGroup {
     const setCodeBitLength = SetCodeIdBitLengthMap[setCode]
     writer.write(8, setCode)
     writer.write(6, this.cardQty.length)
-    writer.write(4, familyIdBitLength)
+    if (this.cardQty.length > 1) {
+      writer.write(4, familyIdBitLength)
+    }
     
     if (DEBUG) {
+      const savings = ((setCodeBitLength - familyIdBitLength) * (this.cardQty.length - 1)) - (this.cardQty.length > 1 ? 4 : 0) - (INITIAL_FAMILY_ID_BIT_LENGTH - setCodeBitLength)
       console.log(`SetGroup: ${setCode} (qty=${this.cardQty.length}) (range: ${familyIdMin}-${familyIdMax}, bit length=${familyIdBitLength} vs. ${SetCodeIdBitLengthMap[setCode]}` +
-        `, saved ${((setCodeBitLength - familyIdBitLength) * (this.cardQty.length - 1)) - 4 - (10 - setCodeBitLength)} bits`)
+        `, saved ${savings} bits`)
     }
 
     let i = 0;
-    for (let cardQty of this.cardQty) {
+    for (let cardQty of sortedCardQty) {
       cardQty.encode(writer, familyIdMin, familyIdBitLength, i === 0)
       i++;
     }
@@ -293,7 +321,7 @@ export class EncodableDeck {
     const self = new EncodableDeck()
     const context = new DecodingContext()
     self.version = reader.readSync(4)
-    if (self.version !== 1) {
+    if (self.version !== 2) {
       throw new DecodingError(`Invalid version (${self.version}`);
     }
 
