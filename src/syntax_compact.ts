@@ -4,6 +4,9 @@ import { getFamilyMeta, type FamilyMeta } from './canonical_sets'
 
 const MAX_REFS_PER_FACTION_GROUP = 63
 
+// Wire version nibble identifying the Compact format (the standard format uses 1).
+const COMPACT_VERSION = 2
+
 function wireRarityFromRef(rarityId: number): number {
   if (rarityId === 4) {
     return 0
@@ -282,15 +285,15 @@ export class EncodableFactionGroup {
   }
 }
 
-export class EncodableDeckV4 {
+export class EncodableDeckCompact {
   version: number
   allQtyOne: boolean
   factionGroups: EncodableFactionGroup[]
 
-  static decode(reader: BitstreamReader): EncodableDeckV4 {
-    const self = new EncodableDeckV4()
+  static decode(reader: BitstreamReader): EncodableDeckCompact {
+    const self = new EncodableDeckCompact()
     self.version = reader.readSync(4)
-    if (self.version !== 4) {
+    if (self.version !== COMPACT_VERSION) {
       throw new DecodingError(`Invalid version (${self.version})`)
     }
 
@@ -330,7 +333,7 @@ export class EncodableDeckV4 {
     }, Array<CardRefQty>())
   }
 
-  static fromList(refQtyList: Array<CardRefQty>): EncodableDeckV4 {
+  static fromList(refQtyList: Array<CardRefQty>): EncodableDeckCompact {
     const merged = mergeEntries(refQtyList.map((rq) => EncodableEntryQty.from(rq.quantity, rq.id)))
 
     const allQtyOne = merged.every((eq) => eq.quantity === 1)
@@ -357,8 +360,8 @@ export class EncodableDeckV4 {
       }
     }
 
-    const deck = new EncodableDeckV4()
-    deck.version = 4
+    const deck = new EncodableDeckCompact()
+    deck.version = COMPACT_VERSION
     deck.allQtyOne = allQtyOne
     deck.factionGroups = factionGroups
     return deck

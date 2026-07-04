@@ -64,9 +64,8 @@ export interface CardRefQty {
 
 export class CardRefElements {
   // Raw set name token from the ID (e.g. "CORE", "DUSTEROP").
-  // V3 uses this as the source of truth instead of RefSetCode.
+  // Prefer this over the RefSetCode enum, which only covers a fixed set list.
   set_code_name: string
-  // Kept for backwards compatibility (V1/V2). Prefer set_code_name when possible.
   set_code: RefSetCode
   product: RefProduct
   faction: RefFaction

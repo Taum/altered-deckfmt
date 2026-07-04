@@ -35,7 +35,12 @@ This project provides a Javascript/Typescript module that can either be imported
 
 Demo page to encode/decode decklists: https://taum.github.io/altered-deckfmt/
 
-A format specification in available in [FORMAT_SPEC.md](FORMAT_SPEC.md).
+## Formats
+
+Two binary formats are available:
+
+- **Standard** (`encodeList` / `decodeList`) — the default, lossless format. Preserves set, product (booster / alt-art / promo), rarity and unique data. Specification: [FORMAT_SPEC.md](FORMAT_SPEC.md).
+- **Compact** (`encodeListCompact` / `decodeListCompact`) — a smaller, lossy alternative. It does **not** keep track of Alternate/Promo variants and **normalizes the Set** of each card (the only exception being uniques from the dual CORE/COREKS family, which are preserved). Specification: [FORMAT_SPEC_COMPACT.md](FORMAT_SPEC_COMPACT.md).
 
 ## Usage
 
