@@ -33,14 +33,13 @@ export declare enum RefSetCode {
     DusterCB = "DUSTERCB",// 11
     DusterOP = "DUSTEROP"
 }
-export declare const SetCodeIdBitLengthMap: Record<number, number>;
-export declare const SetCodeIdWithLegacyRarityLength: number[];
 export type CardId = string;
 export interface CardRefQty {
     quantity: number;
     id: CardId;
 }
 export declare class CardRefElements {
+    set_code_name: string;
     set_code: RefSetCode;
     product: RefProduct;
     faction: RefFaction;
